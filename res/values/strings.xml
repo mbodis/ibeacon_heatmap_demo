@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- GENERAL -->
+    <string name="app_name">iBeacon Heatmap</string>
+    <string name="version">v0.9</string>
+    <string name="date">28.10.2014</string>
+    <string name="name">Miroslav Bodis</string>
+    <string name="url_github">https://github.com/</string><!-- TODO -->
+
+    <!-- HELP -->
+    <string name="help1">What is this app about? \n\n This app demonstrate accuracy of iBeacons inside a room and generate heat map using them.\n\n I used iBKS105 from accent-systems\n transmit interval: 0.1sec\n\n In this demo you can set size of a room and accuracy method, because the raw data from beacons are not precize enought. I use a https://github.com/alt236/Bluetooth-LE-Library---Android library that gives me the accuration in meters for each beacon.</string>
+    <string name="help2">For this demo you will need 3 iBeacons.\n Fisrt, assign colors to your iBeacons in \'setup iBeacons\'. You don\'t have to set UUID or major/minor, I use only bluetooth address.</string>
+    <string name="help3">Set size of your room and select one of the accuracy methods to get more precise values.</string>
+    <string name="help4">Place your iBeacon as picture above in the middle of the walls. If you place the iBeacons wrong, you can get misleading results.</string>
+    <string name="help5">Launch \'generate heat map\' and watch your position. You should see a heatmap of your moves.</string>
+    <string name="help1_title">Welcome</string>
+    <string name="help2_title">Assign color</string>
+    <string name="help3_title">Set size and method</string>
+    <string name="help4_title">Place iBeacons</string>
+    <string name="help5_title">Watch accuracy</string>
+
+    <!-- MAIN ACTIVTY -->
+    <string name="action_about">About</string>
+    <string name="action_licence">Licence</string>
+    <string name="action_help">Help</string>
+    
+    <string name="setup_beacons">Setup iBeacons</string>
+    <string name="generate_heatmap">Generate heatmap</string>
+    <string name="app_method_title">approximation method</string>
+    <string name="room_size">room size (in meters)</string>
+    <string name="err_need_3_ibeacon_for_heatmap">To generate iBeacons please cofigure 3 different iBeacons</string>
+    <string name="err_no_btle_support">Sorry, your device does not support Bluetooth LE</string>
+    <!-- LICENCE DIALOG -->
+    <string name="licence_title">Licences</string>
+    <!-- ABOUT DIALOG -->
+    <string name="about_title">About</string>
+    <string name="about_message">version 1.0\n28.10.2014\n\nMiroslav Bodis </string>
+
+    <string-array name="accuracy_type">
+        <item>use raw distance</item>
+        <item>make average from last 30 values</item>        
+        <item>average 2 min values (2 sec interval)</item>
+        <item>custom test</item>
+    </string-array>
+
+    <!-- IBEACON SETUP -->
+    <string name="turn_on_bt">turn on Bluetooth</string>
+    <string name="no_ibeacons">No iBeacons found</string>
+    <string name="scan">scan</string>
+    <string name="reset">reset</string>
+    <string name="select_color">select color</string>
+
+    <!-- IBEACON ADAPTER -->
+    <string name="address">address:</string>
+    <string name="major">major:</string>
+    <string name="minor">minor:</string>
+    <string name="uuid">UUID:</string>
+    <string name="number">number:</string>
+    <string name="saved">saved</string>
+
+    <!-- GENERATE HEATMAP -->
+    <string name="show_logs">toggle debug</string>
+    <string name="show_heatmap">toggle heatmap</string>
+    <string name="show_ibeacons">toggle ibeacons</string>
+    <string name="toast_debug_state">Debug mode:</string>
+    <string name="toast_heatmap_state">Show heatMap:</string>
+    <string name="toast_ibeacons_state">Show iBeacons:</string>
+    <string name="on">on</string>
+    <string name="off">off</string>
+
+</resources>

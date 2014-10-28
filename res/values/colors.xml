@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- MY COLORS -->    
+    <color name="disabled_grey">#e2e2e2</color>
+    <color name="dark_grey">#2d2d2d</color>
+    <color name="grey">#808080</color>
+    <color name="light_blue">#34B4E7</color>
+    
+    <!-- DEFAULT COLORS -->
+    <color name="black">#000000</color>
+    <color name="white">#ffffffff</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="fuchsia">#FF00FF</color>
+    <color name="red">#FF0000</color>
+    <color name="silver">#C0C0C0</color>
+    <color name="gray">#808080</color>
+    <color name="olive">#808000</color>
+    <color name="purple">#800080</color>
+    <color name="maroon">#800000</color>
+    <color name="aqua">#00FFFF</color>
+    <color name="lime">#00FF00</color>
+    <color name="teal">#008080</color>
+    <color name="green">#008000</color>
+    <color name="blue">#0000FF</color>
+    <color name="brown">#c57a13</color>
+    <color name="navy">#000080</color>
+    <color name="transparent">#00000000</color>
+    <color name="orange">#F7941E</color>
+    <color name="lightorange">#FFBC47</color>
+    <color name="darkgray">#606060</color>
+    <color name="darkergray">#303030</color>
+    <color name="home_background">#f1f2f2</color>
+    <color name="dialog_background">#C0000000</color>
+    <color name="alertdialog_text_color">#f1f2f2</color>
+ 	
+</resources>
