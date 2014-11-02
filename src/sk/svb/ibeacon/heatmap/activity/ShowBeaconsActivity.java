@@ -32,6 +32,7 @@ import android.graphics.Paint.Style;
 import android.graphics.PointF;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,10 +63,11 @@ public class ShowBeaconsActivity extends Activity {
 	private MySurfaceView mySurfaceView;
 	float dn;
 	private int method = -1;
-	private boolean toggleLog = false;
+	private boolean toggleLog = true;
 	private boolean toggleIBeacons = true;
 	private boolean toggleHeatMap = false;
-	private boolean testTriangle = false;
+	private boolean logIntoFile = false;
+	private PowerManager.WakeLock wl;
 
 	// ibeacon scan
 	List<?> myBeacons;
@@ -99,7 +101,14 @@ public class ShowBeaconsActivity extends Activity {
 
 		hmb = new IBeaconHeatMap();
 
+		// wake lock
+		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, TAG);
+
 		dn = getResources().getDisplayMetrics().density;
+
+		// remove all previous logs
+		Logger.removeAllLogs(getApplicationContext());
 
 		if (getIntent() != null) {
 			method = getIntent().getIntExtra("method", -1);
@@ -127,16 +136,20 @@ public class ShowBeaconsActivity extends Activity {
 
 	@Override
 	protected void onPause() {
+		wl.release();
 		mBluetoothAdapter.stopLeScan(mLeScanCallback);
 		super.onPause();
 		mySurfaceView.onPause();
+
 	}
 
 	@Override
 	protected void onResume() {
+		wl.acquire();
 		mBluetoothAdapter.startLeScan(mLeScanCallback);
 		super.onResume();
 		mySurfaceView.onResume();
+
 	}
 
 	@Override
@@ -216,29 +229,10 @@ public class ShowBeaconsActivity extends Activity {
 										.getDeviceAddress().equals(
 												ibeacon.getAddress())) {
 
+									// update accuracy
 									((MyBeaconRaw) myBeacons.get(i))
 											.setAccuracy(ibeacon.getAccuracy(),
 													System.currentTimeMillis());
-
-									switch (((MyBeaconRaw) myBeacons
-											.get(i)).getNumber()) {
-									case 1:
-										radiusR = (float) ((MyBeaconRaw) myBeacons
-												.get(i)).getAccuracy();
-										// log_beacon(ibeacon.getAccuracy(),
-										// "acuracy" + method + ".txt");
-
-										break;
-									case 2:
-										radiusG = (float) ((MyBeaconRaw) myBeacons
-												.get(i)).getAccuracy();
-										break;
-									case 3:
-										radiusB = (float) ((MyBeaconRaw) myBeacons
-												.get(i)).getAccuracy();
-										break;
-
-									}
 								}
 							}
 
@@ -351,6 +345,8 @@ public class ShowBeaconsActivity extends Activity {
 				initCanvas(canvas);
 			}
 
+			updateRadius();
+
 			canvas.drawARGB(255, 255, 255, 255);
 
 			canvas.drawRect(margin, margin, margin + roomW * meter, margin
@@ -371,7 +367,7 @@ public class ShowBeaconsActivity extends Activity {
 				hmb.addBeaconAccuracy(System.currentTimeMillis(), canvas,
 						meter, new PointF(rx, ry), new PointF(gx, (int) gy),
 						new PointF(bx, by), radiusR * meter, radiusG * meter,
-						radiusB * meter);
+						radiusB * meter, (double) roomH / roomW);
 
 				// drawing heat map
 				for (HeatPoint hp : hmb.getHeatPointList()) {
@@ -386,11 +382,6 @@ public class ShowBeaconsActivity extends Activity {
 				}
 			}
 
-			// hidden demo
-			if (testTriangle) {
-				testDemo(canvas);
-			}
-
 			// draw logs, heatmap at bottom, circle penetration
 			if (toggleLog) {
 				drawLogs(canvas);
@@ -400,25 +391,49 @@ public class ShowBeaconsActivity extends Activity {
 		}
 	}
 
+	private void updateRadius() {
+		for (int i = 0; i < myBeacons.size(); i++) {
+			switch (((MyBeaconRaw) myBeacons.get(i)).getNumber()) {
+			case 1:
+				radiusR = (float) ((MyBeaconRaw) myBeacons.get(i))
+						.getAccuracy();
+				if (logIntoFile) {
+					log_beacon(((MyBeaconRaw) myBeacons.get(i)).getAccuracy(),
+							"acuracyRed.txt");
+				}
+				break;
+			case 2:
+				radiusG = (float) ((MyBeaconRaw) myBeacons.get(i))
+						.getAccuracy();
+				if (logIntoFile) {
+					log_beacon(((MyBeaconRaw) myBeacons.get(i)).getAccuracy(),
+							"acuracyGreen.txt");
+				}
+				break;
+			case 3:
+				radiusB = (float) ((MyBeaconRaw) myBeacons.get(i))
+						.getAccuracy();
+				if (logIntoFile) {
+					log_beacon(((MyBeaconRaw) myBeacons.get(i)).getAccuracy(),
+							"acuracyBlue.txt");
+				}
+				break;
+			}
+		}
+	}
+
 	/**
 	 * debug mode, draw intersection of circles
 	 */
 	private void drawCircleIntersection(Canvas canvas) {
-		// test intersection of red and green
-		// List<PointF> te = IBeaconHeatMap.intersectionOfTwoCircles(new
-		// PointF(rx,
-		// ry), radiusR * meter, new PointF(gx, gy), radiusG * meter);
-		// for (PointF point : te) {
-		// canvas.drawCircle(point.x, point.y, 4, pBL);
-		// }
 
 		// testing intersection all 3 circles
-		List<PointF> penetrList = IBeaconHeatMap
-				.getPenetrationOfThreeCircles(new PointF(rx, ry), radiusR
-						* meter, new PointF(gx, gy), radiusG * meter,
-						new PointF(bx, by), radiusB * meter);
-		for (PointF point : penetrList) {
+		List<PointF> penetrList = IBeaconHeatMap.getPenetrationOfThreeCircles(
+				new PointF(rx, ry), radiusR * meter, new PointF(gx, gy),
+				radiusG * meter, new PointF(bx, by), radiusB * meter,
+				(double) roomH / roomW, meter);
 
+		for (PointF point : penetrList) {
 			canvas.drawCircle(point.x, point.y, 4, pBL);
 		}
 	}
@@ -451,33 +466,6 @@ public class ShowBeaconsActivity extends Activity {
 		bx = margin + roomW * meter;
 		by = (int) (margin + (double) roomH / 2 * meter);
 
-	}
-
-	/**
-	 * testing, 3 beacon 2 meters distance each
-	 */
-	private void testDemo(Canvas canvas) {
-		v = (float) Math.sqrt(200 * 200 - 100 * 100);
-		top = canvas.getHeight() / 2 - 100;
-
-		// red
-		rx = canvas.getWidth() / 2;
-		ry = top;
-		// green
-		gx = canvas.getWidth() / 2 - 100;
-		gy = top + v;
-		// blue
-		bx = canvas.getWidth() / 2 + 100;
-		by = top + v;
-
-		canvas.drawARGB(255, 255, 255, 255);
-		canvas.drawCircle(rx, ry, 4, pR);
-		canvas.drawCircle(gx, gy, 4, pG);
-		canvas.drawCircle(bx, by, 4, pB);
-
-		canvas.drawCircle(rx, ry, radiusR * RADIUS_CONST, pRa);
-		canvas.drawCircle(gx, gy, radiusG * RADIUS_CONST, pGa);
-		canvas.drawCircle(bx, by, radiusB * RADIUS_CONST, pBa);
 	}
 
 	/**

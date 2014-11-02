@@ -16,6 +16,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -26,9 +28,9 @@ import android.widget.Toast;
  * choosing accuracy method<br>
  * setting room size<br>
  * action bar (help, about, licences)<br>
- *  
- * first time launch show help 
- *  
+ * 
+ * first time launch show help
+ * 
  * @author mbodis
  *
  */
@@ -37,7 +39,7 @@ public class MainActivity extends Activity {
 	private static final String TAG = "MainActivity";
 
 	public static final int METHOD_RAW = 0;
-	public static final int METHOD_AVERAGE = 1;	
+	public static final int METHOD_AVERAGE = 1;
 	public static final int METHOD_MIN = 2;
 	public static final int METHOD_CUSTOM = 3;
 
@@ -45,15 +47,34 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		((Spinner) findViewById(R.id.acc_method)).setSelection(1);
+		((Spinner) findViewById(R.id.acc_method))
+				.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+					@Override
+					public void onItemSelected(AdapterView<?> parent,
+							View view, int position, long id) {
+						((TextView) findViewById(R.id.acc_method_help))
+								.setText(getResources().getStringArray(
+										R.array.accuracy_type_help)[position]);
+
+					}
+
+					@Override
+					public void onNothingSelected(AdapterView<?> parent) {
+						// TODO Auto-generated method stub
+
+					}
+
+				});
+		((Spinner) findViewById(R.id.acc_method)).setSelection(2);
 
 		// first time - launch help
-		if (firstTimeLaunch()){
+		if (firstTimeLaunch()) {
 			Intent intent = new Intent(getApplicationContext(),
 					HelpFragmentActivity.class);
 			startActivity(intent);
 		}
-		
+
 		if (!getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_BLUETOOTH_LE)) {
 			Toast.makeText(getApplicationContext(),
@@ -97,14 +118,14 @@ public class MainActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
-	private boolean firstTimeLaunch(){
+
+	private boolean firstTimeLaunch() {
 		SharedPreferences sp = (getSharedPreferences(DatabaseHelper.PREFS,
 				Activity.MODE_PRIVATE));
 		boolean result = sp.getBoolean("first_time", true);
 		if (result)
 			sp.edit().putBoolean("first_time", false).commit();
-		
+
 		return result;
 	}
 
@@ -131,7 +152,7 @@ public class MainActivity extends Activity {
 		cdb.setTitle(R.string.about_title);
 		LayoutInflater inflater = (LayoutInflater) getApplicationContext()
 				.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-		final View layout = inflater.inflate(R.layout.about_dialog, null);		
+		final View layout = inflater.inflate(R.layout.about_dialog, null);
 		cdb.setView(layout);
 		cdb.setNeutralButton(android.R.string.ok, null);
 		ad = cdb.create();

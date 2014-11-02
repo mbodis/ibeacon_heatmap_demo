@@ -38,10 +38,17 @@
     <string name="about_message">version 1.0\n28.10.2014\n\nMiroslav Bodis </string>
 
     <string-array name="accuracy_type">
-        <item>use raw distance</item>
-        <item>make average from last 30 values</item>        
-        <item>average 2 min values (2 sec interval)</item>
-        <item>custom test</item>
+        <item>raw distance</item>
+        <item>use average</item>        
+        <item>2 second interval</item>
+        <item>custom</item>
+    </string-array>
+    
+    <string-array name="accuracy_type_help">
+        <item>Use raw distance from iBeacons.</item>
+        <item>Averaged over last 30 values.</item>        
+        <item>Averaged over last two values of the last 2 seconds.</item>
+        <item>Averaged over last two values of the last 15 values. Maximum change from the previous position is limited to 0.1 meter.</item>
     </string-array>
 
     <!-- IBEACON SETUP -->

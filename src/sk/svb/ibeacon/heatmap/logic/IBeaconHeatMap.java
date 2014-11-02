@@ -5,10 +5,11 @@ import java.util.List;
 
 import android.graphics.Canvas;
 import android.graphics.PointF;
+import android.util.Log;
 
 /**
- * calculate intersection of ibeacon accuraties based on visual intersection of circles
- * saving heatPoints<br>
+ * calculate intersection of ibeacon accuraties based on visual intersection of
+ * circles saving heatPoints<br>
  * incerasing "heat" value of points<br>
  * calculate intersection of ibeacon accuraties<br>
  * 
@@ -30,10 +31,10 @@ public class IBeaconHeatMap {
 	private long lastUpdate = 0;
 
 	public IBeaconHeatMap() {
-		heatPointList = new ArrayList<HeatPoint>();		
+		heatPointList = new ArrayList<HeatPoint>();
 	}
 
-	private void test() {
+	public void test() {
 		for (int i = 0; i < 20; i++) {
 			for (int j = 0; j < i; j++) {
 				addHeatPoint(300, 500 + i * 10, 10000, 10000);
@@ -75,14 +76,14 @@ public class IBeaconHeatMap {
 	 */
 	public void addBeaconAccuracy(long now, Canvas canvas, float meter,
 			PointF redP, PointF greenP, PointF blueP, double radiusR,
-			double radiusG, double radiusB) {
+			double radiusG, double radiusB, double ratio) {
 
 		// don't use data from the same time
 		if (lastUpdate == 0 || now - lastUpdate > UPDATE_MIN_INTERVAL) {
 
 			// get penetration of circles
 			List<PointF> penetrList = getPenetrationOfThreeCircles(redP,
-					radiusR, greenP, radiusG, blueP, radiusB);
+					radiusR, greenP, radiusG, blueP, radiusB, ratio, meter);
 			if (penetrList.size() == 0)
 				return;
 
@@ -137,20 +138,22 @@ public class IBeaconHeatMap {
 	 */
 	public static List<PointF> getPenetrationOfThreeCircles(PointF red,
 			double radiusR, PointF green, double radiusG, PointF blue,
-			double radiusB) {
+			double radiusB, double ratio, double meter) {
 
 		List<PointF> result = new ArrayList<PointF>();
 
-		result.addAll(intersectionOfTwoCircles(red, radiusR, green, radiusG));
-		result.addAll(intersectionOfTwoCircles(blue, radiusB, red, radiusR));
-		result.addAll(intersectionOfTwoCircles(green, radiusG, blue, radiusB));
-//		result.addAll(intersectionOfTwoCircles(blue, radiusB, green, radiusG));
+		result.addAll(intersectionOfTwoCircles(red, radiusR, green, radiusG,
+				ratio, meter));
+		result.addAll(intersectionOfTwoCircles(blue, radiusB, red, radiusR,
+				ratio, meter));
+		result.addAll(intersectionOfTwoCircles(green, radiusG, blue, radiusB,
+				ratio, meter));
 
 		return result;
 	}
 
 	/**
-	 * input 6 points return 3 points if there are 3 close enought TEST TODO
+	 * input 6 points return 3 points if there are 3 close enought
 	 */
 	private List<PointF> threePointCloseEnought(List<PointF> points,
 			double meter) {
@@ -201,7 +204,7 @@ public class IBeaconHeatMap {
 	 * thanks to: http://mathworld.wolfram.com/Circle-CircleIntersection.html
 	 */
 	public static List<PointF> intersectionOfTwoCircles(PointF p1, double r1,
-			PointF p2, double r2) {
+			PointF p2, double r2, double ratio, double meter) {
 
 		List<PointF> result = new ArrayList<PointF>();
 
@@ -239,9 +242,9 @@ public class IBeaconHeatMap {
 			// Log.d(TAG, "5 tow points intersect");
 
 			// unit vector (vector between two points divide distance)
-			double jx = (double)(p2.x - p1.x) / dist;
-			double jy = (double)(p2.y - p1.y) / dist;
-						
+			double jx = (double) (p2.x - p1.x) / dist;
+			double jy = (double) (p2.y - p1.y) / dist;
+
 			// math wolfram alpha
 			// double d = dist;
 			// double R = r1;
@@ -251,31 +254,52 @@ public class IBeaconHeatMap {
 			// * Math.sqrt((-d + r - R) * (-d - r + R) * (-d + r + R)
 			// * (d + r + R));
 			// double a_half = a / 2;
-			
+
 			double a = (1 / dist * Math.sqrt((-dist + r2 - r1)
 					* (-dist - r2 + r1) * (-dist + r2 + r1) * (dist + r2 + r1))) / 2;
-			double vxe = -1 * (double)(p2.x - p1.x) / dist * a;
-			double vye = (double)(p2.y - p1.y) / dist * a;
-						
-			double d1 = dist - (double)(dist*dist - r2*r2 + r1*r1  )/ (2*dist);					
-			double ppx = (float)(p2.x - jx*d1);
-			double ppy = (float)(p2.y - jy*d1);
-			
-			// debug axe of intersection (the intersection is perpendiculat to this)
-			//result.add(new PointF((float)(p2.x - jx*d1), (float)(p2.y - jy*d1)));
-						
-			if (p1.x > p2.x) {
-				result.add(new PointF((float) (ppx + vxe), (float) (ppy + vye)));
-				result.add(new PointF((float) (ppx - vxe), (float) (ppy - vye)));				
-				
+			double d1 = dist - (double) (dist * dist - r2 * r2 + r1 * r1)
+					/ (2 * dist);
+
+			// debug axe of intersection (the intersection is perpendiculat to
+			// this)
+			double ppx = (float) (p2.x - jx * d1);
+			double ppy = (float) (p2.y - jy * d1);
+			// result.add(new PointF((float)(p2.x - jx*d1), (float)(p2.y -
+			// jy*d1)));
+
+			// red blue
+			if (p1.y > p2.y) {
+				// perpendicular to jx, jy
+				double X = (double) (p2.x - p1.x) / dist * a;
+				double Y = -1 * (double) (p2.y - p1.y) / dist * a;
+
+				result.add(new PointF((float) (ppx + X * ratio),
+						(float) (ppy + Y / ratio)));
+				result.add(new PointF((float) (ppx - X * ratio),
+						(float) (ppy - Y / ratio)));
+
+				// red green
+			} else if (p1.y < p2.y) {
+				// perpendicular to jx, jy
+				double X = (double) (p2.x - p1.x) / dist * a;
+				double Y = -1 * (double) (p2.y - p1.y) / dist * a;
+
+				result.add(new PointF((float) (ppx + X * ratio),
+						(float) (ppy + Y / ratio)));
+				result.add(new PointF((float) (ppx - X * ratio),
+						(float) (ppy - Y / ratio)));
+
+				// green blue
 			} else {
-				result.add(new PointF((float) ppx, (float) (ppy - vxe)));
-				result.add(new PointF((float) ppx, (float) (ppy + vxe)));
+				// perpendicular to jx, jy
+				double X = -1 * (double) (p2.x - p1.x) / dist * a;
+
+				result.add(new PointF((float) ppx, (float) (ppy - X)));
+				result.add(new PointF((float) ppx, (float) (ppy + X)));
 			}
 
 		}
 
 		return result;
 	}
-
 }

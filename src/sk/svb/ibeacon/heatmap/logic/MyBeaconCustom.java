@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * trying other methods to get more precize distance from beacons 
+ * Averaged over last two values of the last 15 values. Maximum change from the previous position is limited to 0.1 meter. 
  * @author mbodis
  *
  */
@@ -12,11 +12,12 @@ public class MyBeaconCustom extends MyBeaconRaw {
 
 	private static final String TAG = "MyBeaconClassMin";
 
-	private static final int USE_MINS = 2;
-	private static final int TIME_INTERVAL = 1000;
+	
+	public static final int DISTANCE_LIST_SIZE = 15;
+	public static final double DISTANCE_CHANGE_LIMIT= 0.1;
 
-	private List<Double> accList = new ArrayList<Double>();
-	private long time = EMPTY;
+	private List<Double> accList = new ArrayList<Double>();	
+	private double lastValue = EMPTY;
 
 	public MyBeaconCustom(int color, int number, String device,
 			String deviceAddress, String uuid) {
@@ -30,72 +31,55 @@ public class MyBeaconCustom extends MyBeaconRaw {
 				.getDeviceAddress(), raw.getUUID());
 	}
 
-	private double removeMaxAndGetAverageDist() {
-
-		if (accList == null || accList.size() == 0) {
-			return -1;
-		}
-
-		if (accList.size() > USE_MINS) {
-			List<Double> minList = new ArrayList<Double>();
-
-			for (int i = 0; i < USE_MINS; i++) {
-				double min = 999;
-				int indx = -1;
-				for (int j = 0; j < accList.size(); j++) {
-					if (accList.get(j) < min) {
-						min = accList.get(j);
-						indx = j;
-					}
-				}
-				minList.add(accList.get(indx));
-				accList.remove(indx);
-			}
-			accList = minList;
-		}
-
-		double d = 0;
-		for (Double double1 : accList) {
-			d += double1;
-		}
-		return d / accList.size();
-	}
-
 	@Override
 	public double getAccuracy() {
-		return this.getDistance();
+		if (accList.size() == 0 )
+			return -1;
+		
+		if (accList.size() == 1 )
+			return accList.get(0);
+				
+		double min1 = 999, min2 = 999;
+		
+		for (int i=0; i<accList.size(); i++) {
+			
+			if (accList.get(i) < min1){
+				min1 = accList.get(i);
+				
+				if (min2>min1){
+					double s = min2;
+					min2 = min1;
+					min1 = s;
+				}
+			}
+		}
+		
+		double newValue = (min1 + min2) / 2;
+		double oldValue = lastValue; 
+		lastValue = newValue;
+		
+		if (lastValue == EMPTY){
+			return newValue;
+		}
+		
+		if (Math.abs(newValue - oldValue) > DISTANCE_CHANGE_LIMIT){
+			newValue = (newValue - oldValue > 0 ) ? (oldValue+DISTANCE_CHANGE_LIMIT) : (oldValue+DISTANCE_CHANGE_LIMIT);
+		}
+		
+		return newValue; 	 	
 	}
 
 	@Override
-	public void setAccuracy(double newAccuracy, long timeNow) {
-		// Log.d(TAG, "addAccuracy MyBeaconClassMin");
+	public void setAccuracy(double accuracy, long time) {
+		// Log.d(TAG, "MyBeaconClassAverage setAccuracy() :" + accuracy);
 
-		if (accList == null) {
+		if (this.accList == null)
 			return;
-		}
 
-		if (time == EMPTY) {
-			setDistance(newAccuracy);
-			time = timeNow;
-		} else {
-			if (timeNow - time > TIME_INTERVAL) {
-				time = timeNow;
-				
-				setDistance(usePreviousValue(removeMaxAndGetAverageDist()));
-				this.accList.clear();
-			} else {
-				this.accList.add(newAccuracy);
-			}
+		while (this.accList.size() > DISTANCE_LIST_SIZE) {
+			this.accList.remove(0);
 		}
-	}
-	
-	private double usePreviousValue(double val){
-		if (getDistance() == EMPTY){
-			return val;
-		}
-		
-		return (getDistance() + val) / 2;
-		
+		this.accList.add(accuracy);
 	}
 }
 
