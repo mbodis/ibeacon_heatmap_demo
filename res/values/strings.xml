@@ -42,6 +42,7 @@
         <item>use average</item>        
         <item>2 second interval</item>
         <item>custom</item>
+        <item>custom2</item>
     </string-array>
     
     <string-array name="accuracy_type_help">
@@ -49,6 +50,7 @@
         <item>Averaged over last 30 values.</item>        
         <item>Averaged over last two values of the last 2 seconds.</item>
         <item>Averaged over last two values of the last 15 values. Maximum change from the previous position is limited to 0.1 meter.</item>
+        <item>Heat map generation contains of comparison of all values from 1 second interval for each iBeacon. Visualization shows average of last second.</item>
     </string-array>
 
     <!-- IBEACON SETUP -->

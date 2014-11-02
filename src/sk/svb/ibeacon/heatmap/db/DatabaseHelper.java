@@ -6,6 +6,7 @@ import java.util.List;
 import sk.svb.ibeacon.heatmap.activity.MainActivity;
 import sk.svb.ibeacon.heatmap.logic.MyBeaconAverage;
 import sk.svb.ibeacon.heatmap.logic.MyBeaconCustom;
+import sk.svb.ibeacon.heatmap.logic.MyBeaconCustom2;
 import sk.svb.ibeacon.heatmap.logic.MyBeaconMin;
 import sk.svb.ibeacon.heatmap.logic.MyBeaconRaw;
 import android.app.Activity;
@@ -14,22 +15,22 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 
-
 /**
- * // TODO DO A DATABASE INSTEAD OF THIS 
+ * // TODO DO A DATABASE INSTEAD OF THIS
+ * 
  * @author mbodis
  *
  */
 public class DatabaseHelper {
 
 	public static final String TAG = "DatabaseHelper";
-	
+
 	public static final String PREFS = "my_prefs";
 
 	public static final String BEACON_NUM = "num";
 	public static final String BEACON_ADDR = "addr";
 	public static final String BEACON_COLOR = "col";
-	
+
 	private static final int COUNT_BEACONS = 3;
 
 	public static void saveBeacon(Context ctx, MyBeaconRaw mbc) {
@@ -41,10 +42,11 @@ public class DatabaseHelper {
 
 	public static void saveBeacon(Context ctx, String btAddr, int color,
 			int number) {
-		
+
 		Editor e = ctx.getSharedPreferences(PREFS, Activity.MODE_PRIVATE)
-				.edit();		
-		e.putString(BEACON_ADDR + String.valueOf(number), String.valueOf(btAddr));
+				.edit();
+		e.putString(BEACON_ADDR + String.valueOf(number),
+				String.valueOf(btAddr));
 		switch (number) {
 		case 1:
 			e.putInt(BEACON_COLOR + String.valueOf(number), Color.RED);
@@ -59,19 +61,20 @@ public class DatabaseHelper {
 
 		e.putInt(BEACON_NUM + String.valueOf(number), number);
 		e.commit();
-	}	
-	
+	}
+
 	public static MyBeaconRaw getSavedBeacon(Context ctx, int number) {
-		
+
 		MyBeaconRaw mbc = new MyBeaconRaw();
-		
+
 		SharedPreferences sp = (ctx.getSharedPreferences(PREFS,
 				Activity.MODE_PRIVATE));
 		if (!sp.contains(BEACON_NUM + number)) {
 			return null;
 		}
-		
-		mbc.setDeviceAddress(sp.getString(BEACON_ADDR + String.valueOf(number), null));
+
+		mbc.setDeviceAddress(sp.getString(BEACON_ADDR + String.valueOf(number),
+				null));
 		mbc.setColor(sp.getInt(BEACON_COLOR + String.valueOf(number), -1));
 		mbc.setNumber(sp.getInt(BEACON_NUM + String.valueOf(number), -1));
 
@@ -82,26 +85,26 @@ public class DatabaseHelper {
 
 		return mbc;
 	}
-	
+
 	/*
 	 * TODO this isn't very nice
 	 */
-	public static List<?> getSavedBeacons(Context ctx, int type) {		
-		
-		if (type == MainActivity.METHOD_RAW){
+	public static List<?> getSavedBeacons(Context ctx, int type) {
+
+		if (type == MainActivity.METHOD_RAW) {
 			List<MyBeaconRaw> list = new ArrayList<MyBeaconRaw>();
-	
+
 			for (int i = 1; i <= COUNT_BEACONS; i++) {
 				MyBeaconRaw mbc = getSavedBeacon(ctx, i);
 				if (mbc != null) {
 					list.add(mbc);
 				}
 			}
-	
+
 			return list;
-		}else if (type == MainActivity.METHOD_AVERAGE){
+		} else if (type == MainActivity.METHOD_AVERAGE) {
 			List<MyBeaconAverage> list = new ArrayList<MyBeaconAverage>();
-			
+
 			for (int i = 1; i <= COUNT_BEACONS; i++) {
 				MyBeaconRaw m = getSavedBeacon(ctx, i);
 				if (m != null) {
@@ -109,11 +112,11 @@ public class DatabaseHelper {
 					list.add(mbc);
 				}
 			}
-	
+
 			return list;
-		}else if (type == MainActivity.METHOD_MIN){
+		} else if (type == MainActivity.METHOD_MIN) {
 			List<MyBeaconMin> list = new ArrayList<MyBeaconMin>();
-			
+
 			for (int i = 1; i <= COUNT_BEACONS; i++) {
 				MyBeaconRaw m = getSavedBeacon(ctx, i);
 				if (m != null) {
@@ -121,11 +124,11 @@ public class DatabaseHelper {
 					list.add(mbc);
 				}
 			}
-	
+
 			return list;
-		}else if (type == MainActivity.METHOD_CUSTOM){
+		} else if (type == MainActivity.METHOD_CUSTOM) {
 			List<MyBeaconCustom> list = new ArrayList<MyBeaconCustom>();
-			
+
 			for (int i = 1; i <= COUNT_BEACONS; i++) {
 				MyBeaconRaw m = getSavedBeacon(ctx, i);
 				if (m != null) {
@@ -133,16 +136,28 @@ public class DatabaseHelper {
 					list.add(mbc);
 				}
 			}
-	
+
+			return list;
+		} else if (type == MainActivity.METHOD_CUSTOM2) {
+			List<MyBeaconCustom2> list = new ArrayList<MyBeaconCustom2>();
+
+			for (int i = 1; i <= COUNT_BEACONS; i++) {
+				MyBeaconRaw m = getSavedBeacon(ctx, i);
+				if (m != null) {
+					MyBeaconCustom2 mbc = new MyBeaconCustom2(m);
+					list.add(mbc);
+				}
+			}
+
 			return list;
 		}
-		
+
 		return null;
-		
+
 	}
-	
+
 	public static boolean resetSavedBeacon(Context ctx) {
-		
+
 		SharedPreferences sp = (ctx.getSharedPreferences(PREFS,
 				Activity.MODE_PRIVATE));
 		Editor e = sp.edit();
@@ -151,7 +166,7 @@ public class DatabaseHelper {
 			e.remove(BEACON_COLOR + String.valueOf(i));
 			e.remove(BEACON_NUM + String.valueOf(i));
 		}
-		
+
 		return e.commit();
 	}
 }

@@ -9,8 +9,10 @@ import sk.svb.ibeacon.heatmap.R;
 import sk.svb.ibeacon.heatmap.db.DatabaseHelper;
 import sk.svb.ibeacon.heatmap.logic.HeatPoint;
 import sk.svb.ibeacon.heatmap.logic.IBeaconHeatMap;
+import sk.svb.ibeacon.heatmap.logic.MyBeaconCustom2;
 import sk.svb.ibeacon.heatmap.logic.MyBeaconRaw;
 import sk.svb.ibeacon.heatmap.logic.MyIBeaconDevice;
+import sk.svb.ibeacon.heatmap.logic.TimePoint;
 import sk.svb.ibeacon.heatmap.support.Logger;
 import sk.svb.ibeacon.heatmap.support.MySupport;
 import uk.co.alt236.bluetoothlelib.device.BluetoothLeDevice;
@@ -56,8 +58,7 @@ public class ShowBeaconsActivity extends Activity {
 	private static final String TAG = "ShowBeaconsActivity";
 
 	private static final int ALPHA = 20;
-	private static final int NO_ALPHA = 255;
-	private static final int RADIUS_CONST = 100;
+	private static final int NO_ALPHA = 255;	
 
 	// layout, common
 	private MySurfaceView mySurfaceView;
@@ -94,6 +95,7 @@ public class ShowBeaconsActivity extends Activity {
 	private boolean useHeatMap = false;
 	private IBeaconHeatMap hmb;
 	private Bitmap gradient;
+	private long methodCustomLastUpdate = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -364,10 +366,44 @@ public class ShowBeaconsActivity extends Activity {
 
 			// if you have set 3 beacons we can use heatMap
 			if (useHeatMap && toggleHeatMap) {
-				hmb.addBeaconAccuracy(System.currentTimeMillis(), canvas,
-						meter, new PointF(rx, ry), new PointF(gx, (int) gy),
-						new PointF(bx, by), radiusR * meter, radiusG * meter,
-						radiusB * meter, (double) roomH / roomW);
+				if (method == MainActivity.METHOD_CUSTOM2) {
+
+					if (System.currentTimeMillis() - methodCustomLastUpdate > 1000) {
+
+						methodCustomLastUpdate = System.currentTimeMillis();
+						for (TimePoint tpR : ((MyBeaconCustom2) myBeacons
+								.get(0))
+								.getTimesLastSecond(methodCustomLastUpdate)) {
+
+							for (TimePoint tpG : ((MyBeaconCustom2) myBeacons
+									.get(1))
+									.getTimesLastSecond(methodCustomLastUpdate)) {
+
+								for (TimePoint tpB : ((MyBeaconCustom2) myBeacons
+										.get(2))
+										.getTimesLastSecond(methodCustomLastUpdate)) {
+
+									hmb.addBeaconAccuracy(
+											System.currentTimeMillis(), canvas,
+											meter, new PointF(rx, ry),
+											new PointF(gx, (int) gy),
+											new PointF(bx, by), tpR.value
+													* meter, tpG.value * meter,
+											tpB.value * meter, (double) roomH
+													/ roomW);
+								}
+							}
+
+						}
+					}
+					
+				} else {
+					hmb.addBeaconAccuracy(System.currentTimeMillis(), canvas,
+							meter, new PointF(rx, ry),
+							new PointF(gx, (int) gy), new PointF(bx, by),
+							radiusR * meter, radiusG * meter, radiusB * meter,
+							(double) roomH / roomW);
+				}
 
 				// drawing heat map
 				for (HeatPoint hp : hmb.getHeatPointList()) {

@@ -6,8 +6,8 @@ package sk.svb.ibeacon.heatmap.logic;
  *
  */
 public class TimePoint {
-	double value = -1;
-	long time = -1;
+	public double value = -1;
+	public long time = -1;
 	
 	TimePoint(double v, long t){
 		this.value = v;

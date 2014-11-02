@@ -38,6 +38,10 @@ public class MyBeaconCustom extends MyBeaconRaw {
 		
 		if (accList.size() == 1 )
 			return accList.get(0);
+		
+		while (this.accList.size() > DISTANCE_LIST_SIZE) {
+			this.accList.remove(0);
+		}
 				
 		double min1 = 999, min2 = 999;
 		
@@ -75,10 +79,7 @@ public class MyBeaconCustom extends MyBeaconRaw {
 
 		if (this.accList == null)
 			return;
-
-		while (this.accList.size() > DISTANCE_LIST_SIZE) {
-			this.accList.remove(0);
-		}
+		
 		this.accList.add(accuracy);
 	}
 }

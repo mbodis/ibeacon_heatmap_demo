@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.graphics.Canvas;
 import android.graphics.PointF;
-import android.util.Log;
 
 /**
  * calculate intersection of ibeacon accuraties based on visual intersection of
@@ -239,7 +238,7 @@ public class IBeaconHeatMap {
 
 			// two points intersection
 		} else {
-			// Log.d(TAG, "5 tow points intersect");
+			// Log.d(TAG, "5 two points intersect");
 
 			// unit vector (vector between two points divide distance)
 			double jx = (double) (p2.x - p1.x) / dist;

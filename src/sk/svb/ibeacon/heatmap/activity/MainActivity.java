@@ -42,6 +42,7 @@ public class MainActivity extends Activity {
 	public static final int METHOD_AVERAGE = 1;
 	public static final int METHOD_MIN = 2;
 	public static final int METHOD_CUSTOM = 3;
+	public static final int METHOD_CUSTOM2 = 4;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
