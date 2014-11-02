@@ -35,11 +35,15 @@ import android.graphics.PointF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.Toast;
 
 /**
@@ -58,7 +62,7 @@ public class ShowBeaconsActivity extends Activity {
 	private static final String TAG = "ShowBeaconsActivity";
 
 	private static final int ALPHA = 20;
-	private static final int NO_ALPHA = 255;	
+	private static final int NO_ALPHA = 255;
 
 	// layout, common
 	private MySurfaceView mySurfaceView;
@@ -96,6 +100,7 @@ public class ShowBeaconsActivity extends Activity {
 	private IBeaconHeatMap hmb;
 	private Bitmap gradient;
 	private long methodCustomLastUpdate = 0;
+	private String movingIBeacon; // moving iBeacons on canvas
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +131,71 @@ public class ShowBeaconsActivity extends Activity {
 		initBtLe();
 		initColors();
 		mySurfaceView = new MySurfaceView(this);
+		
+		// drag & drop iBeacons
+		mySurfaceView.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
+					if (movingIBeacon == null) {
+						if (Math.abs(event.getX() - rx) < 30
+								&& Math.abs(event.getY() - ry) < 30) {
+							vibrate();
+							movingIBeacon = "red";
+
+						} else if (Math.abs(event.getX() - gx) < 30
+								&& Math.abs(event.getY() - gy) < 30) {
+							movingIBeacon = "green";
+							vibrate();
+
+						} else if (Math.abs(event.getX() - bx) < 30
+								&& Math.abs(event.getY() - by) < 30) {
+							movingIBeacon = "blue";
+							vibrate();
+						}
+					}
+					break;
+				case MotionEvent.ACTION_MOVE:
+					if (movingIBeacon != null && movingIBeacon.equals("red")) {
+						rx = event.getX();
+						ry = event.getY();
+					} else if (movingIBeacon != null
+							&& movingIBeacon.equals("green")) {
+						gx = event.getX();
+						gy = event.getY();
+					} else if (movingIBeacon != null
+							&& movingIBeacon.equals("blue")) {
+						bx = event.getX();
+						by = event.getY();
+					}
+					break;
+				case MotionEvent.ACTION_UP:
+					if (movingIBeacon != null && movingIBeacon.equals("red")) {
+						rx = event.getX();
+						ry = event.getY();
+						movingIBeacon = null;
+						vibrate();
+					} else if (movingIBeacon != null
+							&& movingIBeacon.equals("green")) {
+						gx = event.getX();
+						gy = event.getY();
+						movingIBeacon = null;
+						vibrate();
+					} else if (movingIBeacon != null
+							&& movingIBeacon.equals("blue")) {
+						bx = event.getX();
+						by = event.getY();
+						movingIBeacon = null;
+						vibrate();
+					}
+					break;
+				}
+				return true;
+			}
+		});
 		setContentView(mySurfaceView);
 
 		gradient = BitmapFactory.decodeResource(getResources(),
@@ -396,7 +466,7 @@ public class ShowBeaconsActivity extends Activity {
 
 						}
 					}
-					
+
 				} else {
 					hmb.addBeaconAccuracy(System.currentTimeMillis(), canvas,
 							meter, new PointF(rx, ry),
@@ -425,6 +495,12 @@ public class ShowBeaconsActivity extends Activity {
 			}
 
 		}
+
+	}
+
+	private void vibrate() {
+		Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		v.vibrate(80);
 	}
 
 	private void updateRadius() {

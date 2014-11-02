@@ -12,7 +12,7 @@
     <string name="help1">What is this app about? \n\n This app demonstrate accuracy of iBeacons inside a room and generate heat map using them.\n\n I used iBKS105 from accent-systems\n transmit interval: 0.1sec\n\n In this demo you can set size of a room and accuracy method, because the raw data from beacons are not precize enought. I use a https://github.com/alt236/Bluetooth-LE-Library---Android library that gives me the accuration in meters for each beacon.</string>
     <string name="help2">For this demo you will need 3 iBeacons.\n Fisrt, assign colors to your iBeacons in \'setup iBeacons\'. You don\'t have to set UUID or major/minor, I use only bluetooth address.</string>
     <string name="help3">Set size of your room and select one of the accuracy methods to get more precise values.</string>
-    <string name="help4">Place your iBeacon as picture above in the middle of the walls. If you place the iBeacons wrong, you can get misleading results.</string>
+    <string name="help4">Place your iBeacon as picture above in the middle of the walls. If you place the iBeacons wrong, you can get misleading results. Drag and drop to change location of iBeacons.</string>
     <string name="help5">Launch \'generate heat map\' and watch your position. You should see a heatmap of your moves.</string>
     <string name="help1_title">Welcome</string>
     <string name="help2_title">Assign color</string>
