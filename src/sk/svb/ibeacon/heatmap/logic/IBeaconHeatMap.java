@@ -75,14 +75,14 @@ public class IBeaconHeatMap {
 	 */
 	public void addBeaconAccuracy(long now, Canvas canvas, float meter,
 			PointF redP, PointF greenP, PointF blueP, double radiusR,
-			double radiusG, double radiusB, double ratio) {
+			double radiusG, double radiusB) {
 
 		// don't use data from the same time
 		if (lastUpdate == 0 || now - lastUpdate > UPDATE_MIN_INTERVAL) {
 
 			// get penetration of circles
-			List<PointF> penetrList = getPenetrationOfThreeCircles(redP,
-					radiusR, greenP, radiusG, blueP, radiusB, ratio, meter);
+			List<PointF> penetrList = getIntersectionOfThreeCircles(redP,
+					radiusR, greenP, radiusG, blueP, radiusB);
 			if (penetrList.size() == 0)
 				return;
 
@@ -135,18 +135,15 @@ public class IBeaconHeatMap {
 	 * 
 	 * @return 6 points
 	 */
-	public static List<PointF> getPenetrationOfThreeCircles(PointF red,
+	public static List<PointF> getIntersectionOfThreeCircles(PointF red,
 			double radiusR, PointF green, double radiusG, PointF blue,
-			double radiusB, double ratio, double meter) {
+			double radiusB) {
 
 		List<PointF> result = new ArrayList<PointF>();
 
-		result.addAll(intersectionOfTwoCircles(red, radiusR, green, radiusG,
-				ratio, meter));
-		result.addAll(intersectionOfTwoCircles(blue, radiusB, red, radiusR,
-				ratio, meter));
-		result.addAll(intersectionOfTwoCircles(green, radiusG, blue, radiusB,
-				ratio, meter));
+		result.addAll(intersectionOfTwoCircles(red, radiusR, green, radiusG));
+		result.addAll(intersectionOfTwoCircles(blue, radiusB, red, radiusR));
+		result.addAll(intersectionOfTwoCircles(green, radiusG, blue, radiusB));
 
 		return result;
 	}
@@ -203,7 +200,7 @@ public class IBeaconHeatMap {
 	 * thanks to: http://mathworld.wolfram.com/Circle-CircleIntersection.html
 	 */
 	public static List<PointF> intersectionOfTwoCircles(PointF p1, double r1,
-			PointF p2, double r2, double ratio, double meter) {
+			PointF p2, double r2) {
 
 		List<PointF> result = new ArrayList<PointF>();
 
@@ -240,6 +237,9 @@ public class IBeaconHeatMap {
 		} else {
 			// Log.d(TAG, "5 two points intersect");
 
+			// roomH / roomW
+			double ratio = Math.abs(p1.y - p2.y) / Math.abs(p1.x - p2.x);
+
 			// unit vector (vector between two points divide distance)
 			double jx = (double) (p2.x - p1.x) / dist;
 			double jy = (double) (p2.y - p1.y) / dist;
@@ -266,7 +266,6 @@ public class IBeaconHeatMap {
 			// result.add(new PointF((float)(p2.x - jx*d1), (float)(p2.y -
 			// jy*d1)));
 
-			// red blue
 			if (p1.y > p2.y) {
 				// perpendicular to jx, jy
 				double X = (double) (p2.x - p1.x) / dist * a;
@@ -277,7 +276,6 @@ public class IBeaconHeatMap {
 				result.add(new PointF((float) (ppx - X * ratio),
 						(float) (ppy - Y / ratio)));
 
-				// red green
 			} else if (p1.y < p2.y) {
 				// perpendicular to jx, jy
 				double X = (double) (p2.x - p1.x) / dist * a;
@@ -288,7 +286,6 @@ public class IBeaconHeatMap {
 				result.add(new PointF((float) (ppx - X * ratio),
 						(float) (ppy - Y / ratio)));
 
-				// green blue
 			} else {
 				// perpendicular to jx, jy
 				double X = -1 * (double) (p2.x - p1.x) / dist * a;
@@ -300,5 +297,10 @@ public class IBeaconHeatMap {
 		}
 
 		return result;
+	}
+
+	public void resetHeatMap() {
+		heatPointList = new ArrayList<HeatPoint>();
+		
 	}
 }

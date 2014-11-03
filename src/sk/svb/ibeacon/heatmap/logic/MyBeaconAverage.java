@@ -32,6 +32,10 @@ public class MyBeaconAverage extends MyBeaconRaw {
 		if (accList == null || accList.size() == 0) {
 			return EMPTY;
 		}
+		
+		while (this.accList.size() > DISTANCE_LIST_SIZE) {
+			this.accList.remove(0);
+		}
 
 		double d = 0;
 		for (Double double1 : accList) {
@@ -48,10 +52,7 @@ public class MyBeaconAverage extends MyBeaconRaw {
 
 		if (this.accList == null)
 			return;
-
-		while (this.accList.size() > DISTANCE_LIST_SIZE) {
-			this.accList.remove(0);
-		}
+		
 		this.accList.add(accuracy);
 	}
 

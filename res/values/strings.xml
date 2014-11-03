@@ -4,7 +4,7 @@
     <!-- GENERAL -->
     <string name="app_name">iBeacon Heatmap</string>
     <string name="version">v0.9</string>
-    <string name="date">28.10.2014</string>
+    <string name="date">03.11.2014</string>
     <string name="name">Miroslav Bodis</string>
     <string name="url_github">https://github.com/</string><!-- TODO -->
 
@@ -72,9 +72,14 @@
     <string name="show_logs">toggle debug</string>
     <string name="show_heatmap">toggle heatmap</string>
     <string name="show_ibeacons">toggle ibeacons</string>
+    <string name="reset_heatmap">reset heatmap</string>
+    <string name="log_to_file">log to file</string>
     <string name="toast_debug_state">Debug mode:</string>
     <string name="toast_heatmap_state">Show heatMap:</string>
     <string name="toast_ibeacons_state">Show iBeacons:</string>
+    <string name="toast_reset_heatmap">Heat map restarted.</string>
+    <string name="toast_log_to_file">Loggin accuracy from iBeacons to file:</string>
+    <string name="toast_remove_logs">Removing previous logs…</string>
     <string name="on">on</string>
     <string name="off">off</string>
 

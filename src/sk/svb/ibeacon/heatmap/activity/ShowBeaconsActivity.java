@@ -112,10 +112,12 @@ public class ShowBeaconsActivity extends Activity {
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, TAG);
 
-		dn = getResources().getDisplayMetrics().density;
-
 		// remove all previous logs
-		Logger.removeAllLogs(getApplicationContext());
+		if (Logger.removeAllLogs(getApplicationContext())) {
+			Toast.makeText(getApplicationContext(),
+					getString(R.string.toast_remove_logs), Toast.LENGTH_SHORT)
+					.show();
+		}
 
 		if (getIntent() != null) {
 			method = getIntent().getIntExtra("method", -1);
@@ -131,7 +133,7 @@ public class ShowBeaconsActivity extends Activity {
 		initBtLe();
 		initColors();
 		mySurfaceView = new MySurfaceView(this);
-		
+
 		// drag & drop iBeacons
 		mySurfaceView.setOnTouchListener(new OnTouchListener() {
 
@@ -260,6 +262,20 @@ public class ShowBeaconsActivity extends Activity {
 									: getString(R.string.off)),
 					Toast.LENGTH_SHORT).show();
 			return true;
+		} else if (id == R.id.action_reset_heatmap) {
+			hmb.resetHeatMap();
+			Toast.makeText(getApplicationContext(),
+					getString(R.string.toast_reset_heatmap), Toast.LENGTH_SHORT)
+					.show();
+			return true;
+		} else if (id == R.id.action_log_to_file) {
+			logIntoFile = true;
+			Toast.makeText(
+					getApplicationContext(),
+					getString(R.string.toast_log_to_file)
+							+ Logger.getFolderName(getApplicationContext()),
+					Toast.LENGTH_SHORT).show();
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -328,6 +344,8 @@ public class ShowBeaconsActivity extends Activity {
 	}
 
 	private void initColors() {
+		dn = getResources().getDisplayMetrics().density;
+
 		pR = new Paint();
 		pR.setColor(Color.RED);
 		pR.setTextSize(10 * dn);
@@ -459,8 +477,7 @@ public class ShowBeaconsActivity extends Activity {
 											new PointF(gx, (int) gy),
 											new PointF(bx, by), tpR.value
 													* meter, tpG.value * meter,
-											tpB.value * meter, (double) roomH
-													/ roomW);
+											tpB.value * meter);
 								}
 							}
 
@@ -471,8 +488,7 @@ public class ShowBeaconsActivity extends Activity {
 					hmb.addBeaconAccuracy(System.currentTimeMillis(), canvas,
 							meter, new PointF(rx, ry),
 							new PointF(gx, (int) gy), new PointF(bx, by),
-							radiusR * meter, radiusG * meter, radiusB * meter,
-							(double) roomH / roomW);
+							radiusR * meter, radiusG * meter, radiusB * meter);
 				}
 
 				// drawing heat map
@@ -495,7 +511,6 @@ public class ShowBeaconsActivity extends Activity {
 			}
 
 		}
-
 	}
 
 	private void vibrate() {
@@ -511,7 +526,7 @@ public class ShowBeaconsActivity extends Activity {
 						.getAccuracy();
 				if (logIntoFile) {
 					log_beacon(((MyBeaconRaw) myBeacons.get(i)).getAccuracy(),
-							"acuracyRed.txt");
+							Logger.IBEACON_R);
 				}
 				break;
 			case 2:
@@ -519,7 +534,7 @@ public class ShowBeaconsActivity extends Activity {
 						.getAccuracy();
 				if (logIntoFile) {
 					log_beacon(((MyBeaconRaw) myBeacons.get(i)).getAccuracy(),
-							"acuracyGreen.txt");
+							Logger.IBEACON_G);
 				}
 				break;
 			case 3:
@@ -527,7 +542,7 @@ public class ShowBeaconsActivity extends Activity {
 						.getAccuracy();
 				if (logIntoFile) {
 					log_beacon(((MyBeaconRaw) myBeacons.get(i)).getAccuracy(),
-							"acuracyBlue.txt");
+							Logger.IBEACON_B);
 				}
 				break;
 			}
@@ -540,10 +555,9 @@ public class ShowBeaconsActivity extends Activity {
 	private void drawCircleIntersection(Canvas canvas) {
 
 		// testing intersection all 3 circles
-		List<PointF> penetrList = IBeaconHeatMap.getPenetrationOfThreeCircles(
+		List<PointF> penetrList = IBeaconHeatMap.getIntersectionOfThreeCircles(
 				new PointF(rx, ry), radiusR * meter, new PointF(gx, gy),
-				radiusG * meter, new PointF(bx, by), radiusB * meter,
-				(double) roomH / roomW, meter);
+				radiusG * meter, new PointF(bx, by), radiusB * meter);
 
 		for (PointF point : penetrList) {
 			canvas.drawCircle(point.x, point.y, 4, pBL);

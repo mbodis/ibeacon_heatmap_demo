@@ -14,6 +14,14 @@
         android:id="@+id/action_toggle_ibeacons"        
         android:orderInCategory="122"        
         android:title="@string/show_ibeacons"/>
+    <item
+        android:id="@+id/action_reset_heatmap"        
+        android:orderInCategory="123"        
+        android:title="@string/reset_heatmap"/>
+    <item
+        android:id="@+id/action_log_to_file"        
+        android:orderInCategory="124"        
+        android:title="@string/log_to_file"/>
    
 
 </menu>
