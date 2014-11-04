@@ -30,7 +30,7 @@ public class MyBeaconCustom2 extends MyBeaconRaw{
 				.getDeviceAddress(), raw.getUUID());
 	}
 
-	private void removeOldValues(long now) {
+	synchronized private void removeOldValues(long now) {
 		for (int i = 0; i < timeList.size(); i++) {
 			if (now - timeList.get(i).time > TIME_INTERVAL
 					&& timeList.size() > 1) {
@@ -41,7 +41,7 @@ public class MyBeaconCustom2 extends MyBeaconRaw{
 	}
 
 	@Override
-	public double getAccuracy() {
+	synchronized public double getAccuracy() {
 
 		if (timeList.size() == 0)
 			return -1;
@@ -64,7 +64,7 @@ public class MyBeaconCustom2 extends MyBeaconRaw{
 		return d/s;
 	}
 	
-	public List<TimePoint> getTimesLastSecond(long now){
+	synchronized public List<TimePoint> getTimesLastSecond(long now){
 				
 		List<TimePoint> tl = new ArrayList<TimePoint>();
 		
@@ -77,7 +77,7 @@ public class MyBeaconCustom2 extends MyBeaconRaw{
 	}
 
 	@Override
-	public void setAccuracy(double newAccuracy, long timeNow) {
+	synchronized public void setAccuracy(double newAccuracy, long timeNow) {
 		// Log.d(TAG, "addAccuracy MyBeaconClassMin");
 
 		if (timeList == null) {

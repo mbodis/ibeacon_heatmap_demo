@@ -31,7 +31,7 @@ public class MyBeaconMin extends MyBeaconRaw {
 				.getDeviceAddress(), raw.getUUID());
 	}
 
-	private void removeOldValues(long now) {
+	synchronized private void removeOldValues(long now) {
 		for (int i = 0; i < timeList.size(); i++) {
 			if (now - timeList.get(i).time > TIME_INTERVAL
 					&& timeList.size() > 1) {
@@ -42,7 +42,7 @@ public class MyBeaconMin extends MyBeaconRaw {
 	}
 
 	@Override
-	public double getAccuracy() {
+	synchronized public double getAccuracy() {
 
 		if (timeList.size() == 0)
 			return -1;
@@ -71,7 +71,7 @@ public class MyBeaconMin extends MyBeaconRaw {
 	}
 
 	@Override
-	public void setAccuracy(double newAccuracy, long timeNow) {
+	synchronized public void setAccuracy(double newAccuracy, long timeNow) {
 		// Log.d(TAG, "addAccuracy MyBeaconClassMin");
 
 		if (timeList == null) {

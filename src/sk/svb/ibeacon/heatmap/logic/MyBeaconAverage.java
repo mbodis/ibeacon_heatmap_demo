@@ -27,7 +27,7 @@ public class MyBeaconAverage extends MyBeaconRaw {
 	}
 
 	@Override
-	public double getAccuracy() {
+	synchronized public double getAccuracy() {
 		// Log.d(TAG, "MyBeaconClassAverage getAccuracy()");
 		if (accList == null || accList.size() == 0) {
 			return EMPTY;
@@ -47,7 +47,7 @@ public class MyBeaconAverage extends MyBeaconRaw {
 	}
 
 	@Override
-	public void setAccuracy(double accuracy, long time) {
+	synchronized public void setAccuracy(double accuracy, long time) {
 		// Log.d(TAG, "MyBeaconClassAverage setAccuracy() :" + accuracy);
 
 		if (this.accList == null)
