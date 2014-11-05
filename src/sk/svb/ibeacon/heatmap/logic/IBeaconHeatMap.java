@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.graphics.Canvas;
 import android.graphics.PointF;
+import android.graphics.YuvImage;
 
 /**
  * calculate intersection of ibeacon accuraties based on visual intersection of
@@ -74,15 +75,18 @@ public class IBeaconHeatMap {
 	 *            radius of blue iBeacon (pixels)
 	 */
 	public void addBeaconAccuracy(long now, Canvas canvas, float meter,
-			PointF redP, PointF greenP, PointF blueP, double radiusR,
-			double radiusG, double radiusB) {
+			MyPointF redP, MyPointF greenP, MyPointF blueP, MyPointF yellowP) {
 
 		// don't use data from the same time
 		if (lastUpdate == 0 || now - lastUpdate > UPDATE_MIN_INTERVAL) {
 
 			// get penetration of circles
-			List<PointF> penetrList = getIntersectionOfThreeCircles(redP,
-					radiusR, greenP, radiusG, blueP, radiusB);
+			List<MyPointF> list = new ArrayList<MyPointF>();
+			list.add(redP);
+			list.add(greenP);
+			list.add(blueP);
+			list.add(yellowP);
+			List<PointF> penetrList = getIntersectionOfThreeCircles(list);
 			if (penetrList.size() == 0)
 				return;
 
@@ -135,15 +139,17 @@ public class IBeaconHeatMap {
 	 * 
 	 * @return 6 points
 	 */
-	public static List<PointF> getIntersectionOfThreeCircles(PointF red,
-			double radiusR, PointF green, double radiusG, PointF blue,
-			double radiusB) {
+	public static List<PointF> getIntersectionOfThreeCircles(List<MyPointF> list) {
 
 		List<PointF> result = new ArrayList<PointF>();
-
-		result.addAll(intersectionOfTwoCircles(red, radiusR, green, radiusG));
-		result.addAll(intersectionOfTwoCircles(blue, radiusB, red, radiusR));
-		result.addAll(intersectionOfTwoCircles(green, radiusG, blue, radiusB));
+		
+		for (int i = 0; i < list.size(); i++) {
+			for (int j = 0; j < list.size(); j++) {
+				if (i != j){
+					result.addAll(intersectionOfTwoCircles(list.get(i), list.get(i).radius, list.get(j), list.get(j).radius));
+				}
+			}
+		}		
 
 		return result;
 	}
@@ -199,8 +205,8 @@ public class IBeaconHeatMap {
 	/**
 	 * thanks to: http://mathworld.wolfram.com/Circle-CircleIntersection.html
 	 */
-	public static List<PointF> intersectionOfTwoCircles(PointF p1, double r1,
-			PointF p2, double r2) {
+	public static List<PointF> intersectionOfTwoCircles(MyPointF p1, double r1,
+			MyPointF p2, double r2) {
 
 		List<PointF> result = new ArrayList<PointF>();
 

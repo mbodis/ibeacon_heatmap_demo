@@ -36,6 +36,15 @@
             android:background="@drawable/color_black_selector"
             android:clickable="true"
             android:src="@color/blue" />
+        
+        <ImageView
+            android:id="@+id/btn_yellow"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/color_black_selector"
+            android:clickable="true"
+            android:src="@color/yellow" />
     </LinearLayout>
 
 </RelativeLayout>

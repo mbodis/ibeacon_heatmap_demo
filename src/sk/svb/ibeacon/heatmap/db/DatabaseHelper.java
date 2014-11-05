@@ -31,7 +31,7 @@ public class DatabaseHelper {
 	public static final String BEACON_ADDR = "addr";
 	public static final String BEACON_COLOR = "col";
 
-	private static final int COUNT_BEACONS = 3;
+	private static final int COUNT_BEACONS = 4;
 
 	public static void saveBeacon(Context ctx, MyBeaconRaw mbc) {
 		if (mbc == null)
@@ -56,6 +56,9 @@ public class DatabaseHelper {
 			break;
 		case 3:
 			e.putInt(BEACON_COLOR + String.valueOf(number), Color.BLUE);
+			break;
+		case 4:
+			e.putInt(BEACON_COLOR + String.valueOf(number), Color.YELLOW);
 			break;
 		}
 

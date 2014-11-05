@@ -184,6 +184,9 @@ public class SetupBeaconActivity extends Activity {
 				} else if (v.getId() == R.id.btn_blue) {
 					selecedIBeacon.setColor(Color.BLUE);
 					selecedIBeacon.setNumber(3);
+				} else if (v.getId() == R.id.btn_yellow) {
+					selecedIBeacon.setColor(Color.BLUE);
+					selecedIBeacon.setNumber(4);
 				}
 				DatabaseHelper.saveBeacon(getApplicationContext(),
 						selecedIBeacon);
@@ -195,6 +198,7 @@ public class SetupBeaconActivity extends Activity {
 		layout.findViewById(R.id.btn_red).setOnClickListener(lis);
 		layout.findViewById(R.id.btn_green).setOnClickListener(lis);
 		layout.findViewById(R.id.btn_blue).setOnClickListener(lis);
+		layout.findViewById(R.id.btn_yellow).setOnClickListener(lis);
 
 		ad = cdb.create();
 		ad.show();

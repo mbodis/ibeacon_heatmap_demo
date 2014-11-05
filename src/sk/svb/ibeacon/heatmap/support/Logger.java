@@ -16,6 +16,7 @@ public class Logger {
 	public static final String IBEACON_R = "accuracyR.txt";
 	public static final String IBEACON_G = "accuracyG.txt";
 	public static final String IBEACON_B = "accuracyB.txt";
+	public static final String IBEACON_Y = "accuracyY.txt";
 
 	public static final String[] ALL_FILES = { IBEACON_R, IBEACON_G, IBEACON_B,
 			FILE_IBEACON };

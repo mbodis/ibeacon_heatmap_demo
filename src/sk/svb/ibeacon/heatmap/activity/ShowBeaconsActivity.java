@@ -1,6 +1,7 @@
 package sk.svb.ibeacon.heatmap.activity;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -12,6 +13,7 @@ import sk.svb.ibeacon.heatmap.logic.IBeaconHeatMap;
 import sk.svb.ibeacon.heatmap.logic.MyBeaconCustom2;
 import sk.svb.ibeacon.heatmap.logic.MyBeaconRaw;
 import sk.svb.ibeacon.heatmap.logic.MyIBeaconDevice;
+import sk.svb.ibeacon.heatmap.logic.MyPointF;
 import sk.svb.ibeacon.heatmap.logic.TimePoint;
 import sk.svb.ibeacon.heatmap.support.Logger;
 import sk.svb.ibeacon.heatmap.support.MySupport;
@@ -86,14 +88,15 @@ public class ShowBeaconsActivity extends Activity {
 	private int roomW, roomH;
 
 	// canvas ibeacons
-	private float radiusR = 0f;// 0.5f;
-	private float radiusG = 0f;// 1f;
-	private float radiusB = 0f;// 2f;
-	float top, v, rx, ry, gx, gy, bx, by;
+	private float radiusR = 0f;
+	private float radiusG = 0f;
+	private float radiusB = 0f;
+	private float radiusY = 0f;
+	float top, v, rx, ry, gx, gy, bx, by, yx, yy;
 
 	// canvas colors
-	private Paint pR, pG, pB, pBL, psqBL;
-	private Paint pRa, pGa, pBa, pBLa;
+	private Paint pR, pG, pB, pY, pBL, psqBL;
+	private Paint pRa, pGa, pBa, pYa, pBLa;
 
 	// heatMap
 	private boolean useHeatMap = false;
@@ -157,6 +160,10 @@ public class ShowBeaconsActivity extends Activity {
 								&& Math.abs(event.getY() - by) < 30) {
 							movingIBeacon = "blue";
 							vibrate();
+						} else if (Math.abs(event.getX() - yx) < 30
+								&& Math.abs(event.getY() - yy) < 30) {
+							movingIBeacon = "yellow";
+							vibrate();
 						}
 					}
 					break;
@@ -172,6 +179,10 @@ public class ShowBeaconsActivity extends Activity {
 							&& movingIBeacon.equals("blue")) {
 						bx = event.getX();
 						by = event.getY();
+					} else if (movingIBeacon != null
+							&& movingIBeacon.equals("yellow")) {
+						yx = event.getX();
+						yy = event.getY();
 					}
 					break;
 				case MotionEvent.ACTION_UP:
@@ -190,6 +201,12 @@ public class ShowBeaconsActivity extends Activity {
 							&& movingIBeacon.equals("blue")) {
 						bx = event.getX();
 						by = event.getY();
+						movingIBeacon = null;
+						vibrate();
+					} else if (movingIBeacon != null
+							&& movingIBeacon.equals("yellow")) {
+						yx = event.getX();
+						yy = event.getY();
 						movingIBeacon = null;
 						vibrate();
 					}
@@ -290,7 +307,7 @@ public class ShowBeaconsActivity extends Activity {
 		myBeacons = DatabaseHelper.getSavedBeacons(getApplicationContext(),
 				method);
 
-		useHeatMap = (myBeacons.size() == 3);
+		useHeatMap = (myBeacons.size() >= 3);
 
 		mLeScanCallback = new LeScanCallback() {
 
@@ -358,6 +375,9 @@ public class ShowBeaconsActivity extends Activity {
 		pBL = new Paint();
 		pBL.setColor(Color.BLACK);
 		pBL.setTextSize(10 * dn);
+		pY = new Paint();
+		pY.setColor(Color.YELLOW);
+		pY.setTextSize(10 * dn);
 
 		psqBL = new Paint();
 		psqBL.setColor(Color.BLACK);
@@ -372,6 +392,9 @@ public class ShowBeaconsActivity extends Activity {
 		pBa = new Paint();
 		pBa.setColor(Color.BLUE);
 		pBa.setAlpha(ALPHA);
+		pYa = new Paint();
+		pYa.setColor(Color.YELLOW);
+		pYa.setAlpha(ALPHA);
 		pBLa = new Paint();
 		pBLa.setColor(Color.BLACK);
 		pBLa.setAlpha(ALPHA);
@@ -444,12 +467,14 @@ public class ShowBeaconsActivity extends Activity {
 			canvas.drawCircle(rx, ry, 4, pR);
 			canvas.drawCircle(gx, gy, 4, pG);
 			canvas.drawCircle(bx, by, 4, pB);
+			canvas.drawCircle(yx, yy, 4, pY);
 
 			// show accuraties from iBeacons
 			if (toggleIBeacons) {
 				canvas.drawCircle(rx, ry, radiusR * meter, pRa);
 				canvas.drawCircle(gx, gy, radiusG * meter, pGa);
 				canvas.drawCircle(bx, by, radiusB * meter, pBa);
+				canvas.drawCircle(yx, yy, radiusY * meter, pYa);
 			}
 
 			// if you have set 3 beacons we can use heatMap
@@ -471,13 +496,21 @@ public class ShowBeaconsActivity extends Activity {
 										.get(2))
 										.getTimesLastSecond(methodCustomLastUpdate)) {
 
-									hmb.addBeaconAccuracy(
-											System.currentTimeMillis(), canvas,
-											meter, new PointF(rx, ry),
-											new PointF(gx, (int) gy),
-											new PointF(bx, by), tpR.value
-													* meter, tpG.value * meter,
-											tpB.value * meter);
+								
+									for (TimePoint tpY : ((MyBeaconCustom2) myBeacons
+											.get(3))
+											.getTimesLastSecond(methodCustomLastUpdate)) {
+	
+										hmb.addBeaconAccuracy(System
+												.currentTimeMillis(), canvas,
+												meter, new MyPointF(rx, ry,
+														tpR.value * meter),
+												new MyPointF(gx, gy, tpG.value
+														* meter), new MyPointF(bx,
+														by, tpB.value * meter),
+												new MyPointF(yx, yy, tpY.value
+														* meter));
+									}
 								}
 							}
 
@@ -486,9 +519,10 @@ public class ShowBeaconsActivity extends Activity {
 
 				} else {
 					hmb.addBeaconAccuracy(System.currentTimeMillis(), canvas,
-							meter, new PointF(rx, ry),
-							new PointF(gx, (int) gy), new PointF(bx, by),
-							radiusR * meter, radiusG * meter, radiusB * meter);
+							meter, new MyPointF(rx, ry, radiusR * meter),
+							new MyPointF(gx, gy, radiusG * meter),
+							new MyPointF(bx, by, radiusB * meter),
+							new MyPointF(yx, yy, radiusY * meter));
 				}
 
 				// drawing heat map
@@ -545,6 +579,14 @@ public class ShowBeaconsActivity extends Activity {
 							Logger.IBEACON_B);
 				}
 				break;
+			case 4:
+				radiusY = (float) ((MyBeaconRaw) myBeacons.get(i))
+						.getAccuracy();
+				if (logIntoFile) {
+					log_beacon(((MyBeaconRaw) myBeacons.get(i)).getAccuracy(),
+							Logger.IBEACON_Y);
+				}
+				break;
 			}
 		}
 	}
@@ -555,9 +597,13 @@ public class ShowBeaconsActivity extends Activity {
 	private void drawCircleIntersection(Canvas canvas) {
 
 		// testing intersection all 3 circles
-		List<PointF> penetrList = IBeaconHeatMap.getIntersectionOfThreeCircles(
-				new PointF(rx, ry), radiusR * meter, new PointF(gx, gy),
-				radiusG * meter, new PointF(bx, by), radiusB * meter);
+		List<MyPointF> m = new ArrayList<MyPointF>();
+		m.add(new MyPointF(rx, ry, radiusR * meter));
+		m.add(new MyPointF(gx, gy, radiusG * meter));
+		m.add(new MyPointF(bx, by, radiusB * meter));
+		m.add(new MyPointF(yx, yy, radiusY * meter));
+		List<PointF> penetrList = IBeaconHeatMap
+				.getIntersectionOfThreeCircles(m);
 
 		for (PointF point : penetrList) {
 			canvas.drawCircle(point.x, point.y, 4, pBL);
@@ -591,6 +637,9 @@ public class ShowBeaconsActivity extends Activity {
 		// blue
 		bx = margin + roomW * meter;
 		by = (int) (margin + (double) roomH / 2 * meter);
+		// yellow
+		yx = (int) (margin + (double) roomW / 2 * meter);
+		yy = (int) (margin + (double) roomH * meter);
 
 	}
 
@@ -604,10 +653,11 @@ public class ShowBeaconsActivity extends Activity {
 		canvas.drawText("red: " + radiusR + " m", 10 * dn, 20 * dn, pR);
 		canvas.drawText("green: " + radiusG + " m", 10 * dn, 30 * dn, pG);
 		canvas.drawText("blue: " + radiusB + " m", 10 * dn, 40 * dn, pB);
-		canvas.drawText("1 meter", 10 * dn, 65 * dn, pBL);
-		canvas.drawLine(10, 70 * dn, meter + 10, 70 * dn, pBL);
-		canvas.drawLine(10, 65 * dn, 10, 75 * dn, pBL);
-		canvas.drawLine(meter + 10, 65 * dn, meter + 10, 75 * dn, pBL);
+		canvas.drawText("yellow: " + radiusY + " m", 10 * dn, 50 * dn, pY);
+		canvas.drawText("1 meter", 10 * dn, 75 * dn, pBL);
+		canvas.drawLine(10, 80 * dn, meter + 10, 80 * dn, pBL);
+		canvas.drawLine(10, 75 * dn, 10, 85 * dn, pBL);
+		canvas.drawLine(meter + 10, 75 * dn, meter + 10, 85 * dn, pBL);
 		canvas.drawBitmap(gradient, 10,
 				canvas.getHeight() - gradient.getHeight() - 10, null);
 	}
