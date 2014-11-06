@@ -619,7 +619,7 @@ public class ShowBeaconsActivity extends Activity {
 		margin = canvas.getHeight() / 20;
 
 		// use canvas.width as main parameter
-		if ((canvas.getHeight() - 2 * margin) / roomH * roomW > canvas
+		if ((canvas.getHeight() - 2 * margin) / roomH * roomW  + 2*margin> canvas
 				.getWidth()) {
 			meter = (canvas.getWidth() - 2 * margin) / roomW;
 
