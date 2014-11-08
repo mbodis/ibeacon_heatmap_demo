@@ -15,7 +15,7 @@ public class MyIBeaconDevice extends IBeaconDevice {
 	}
 
 	/**
-	 * @author mbodis for this demo is enought to compare bt-address
+	 * @author mbodis for this demo I use to compare only bluestooth-address
 	 */
 	@Override
 	public boolean equals(Object object) {

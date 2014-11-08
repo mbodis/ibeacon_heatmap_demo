@@ -27,7 +27,7 @@ import android.widget.Toast;
  * setting up iBeacons<br>
  * choosing accuracy method<br>
  * setting room size<br>
- * action bar (help, about, licences)<br>
+ * action bar (help, about, licenses)<br>
  * 
  * first time launch show help
  * 
@@ -43,6 +43,7 @@ public class MainActivity extends Activity {
 	public static final int METHOD_MIN = 2;
 	public static final int METHOD_CUSTOM = 3;
 	public static final int METHOD_CUSTOM2 = 4;
+	public static final int METHOD_CUSTOM2_TIME_AGGREGATION = 10;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -167,8 +168,10 @@ public class MainActivity extends Activity {
 	}
 
 	public void showBeacons(View view) {
-		if (DatabaseHelper.getSavedBeacons(getApplicationContext(),
-				getSelectedMethod()).size() < 3) {
+		int numbSettIbeacons = DatabaseHelper.getSavedBeacons(
+				getApplicationContext(), getSelectedMethod()).size();
+
+		if (numbSettIbeacons < 3) {
 			Toast.makeText(getApplicationContext(),
 					getString(R.string.err_need_3_ibeacon_for_heatmap),
 					Toast.LENGTH_SHORT).show();
@@ -176,6 +179,7 @@ public class MainActivity extends Activity {
 
 		Intent intent = new Intent(getApplicationContext(),
 				ShowBeaconsActivity.class);
+
 		intent.putExtra("method", getSelectedMethod());
 		if (getRoomHeight() < getRoomWidth()) {
 			intent.putExtra("r_width", getRoomHeight());
@@ -184,7 +188,11 @@ public class MainActivity extends Activity {
 			intent.putExtra("r_width", getRoomWidth());
 			intent.putExtra("r_height", getRoomHeight());
 		}
-		startActivity(intent);
+		if (numbSettIbeacons != 4 && getSelectedMethod() == METHOD_CUSTOM2) {
+			Toast.makeText(this, getString(R.string.toast_4_ibeacons_required), Toast.LENGTH_LONG).show();
+		} else {
+			startActivity(intent);
+		}
 	}
 
 	private int getSelectedMethod() {

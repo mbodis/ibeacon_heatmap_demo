@@ -12,6 +12,8 @@ import java.util.List;
  */
 public class MyBeaconMin extends MyBeaconRaw {
 
+	private static final long serialVersionUID = -16349990624889695L;
+
 	private static final String TAG = "MyBeaconClassMin";
 
 	private static final int USE_MINS = 2;

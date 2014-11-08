@@ -15,7 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
- * ibeacon list adapter, if saved beacon show color + "saved"
+ * iBeacon list adapter, if saved beacon show color + "saved"
  * 
  * @author mbodis
  *

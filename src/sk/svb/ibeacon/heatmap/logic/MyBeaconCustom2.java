@@ -1,20 +1,22 @@
 package sk.svb.ibeacon.heatmap.logic;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Heat map generation contains of comparison of all values from 1 second interval for each iBeacon. Visualization shows average of last second.
+ * saves all values with corresponding time
+ * 
  * @author mbodis
  *
  */
-public class MyBeaconCustom2 extends MyBeaconRaw{
-	private static final String TAG = "MyBeaconCustom2";
+public class MyBeaconCustom2 extends MyBeaconRaw implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5118928179791512415L;
 
-	private static final int USE_MINS = 2;
-	private static final int TIME_INTERVAL = 2000; // milis
-	
-	private static final int TIME = 1000;
+	transient private static final String TAG = "MyBeaconCustom2";
 
 	private List<TimePoint> timeList = new ArrayList<TimePoint>();
 
@@ -30,14 +32,16 @@ public class MyBeaconCustom2 extends MyBeaconRaw{
 				.getDeviceAddress(), raw.getUUID());
 	}
 
-	synchronized private void removeOldValues(long now) {
-		for (int i = 0; i < timeList.size(); i++) {
-			if (now - timeList.get(i).time > TIME_INTERVAL
-					&& timeList.size() > 1) {
-				timeList.remove(i);
-				i--;
+	synchronized public List<TimePoint> getPointsInterval(long from, long to) {
+
+		List<TimePoint> l = new ArrayList<TimePoint>();
+		for (TimePoint tp : timeList) {
+			if (tp.time >= from && tp.time < to) {
+				l.add(tp);
 			}
 		}
+
+		return l;
 	}
 
 	@Override
@@ -46,34 +50,8 @@ public class MyBeaconCustom2 extends MyBeaconRaw{
 		if (timeList.size() == 0)
 			return -1;
 
-		if (timeList.size() == 1)
-			return timeList.get(0).value;
-
-		long l = System.currentTimeMillis();
-		removeOldValues(l);			
-
-		double d = 0;
-		int s = timeList.size();
-		for (int i = 0; i < s; i++) {
-
-			if (l - timeList.get(i).time< TIME) {
-				d += timeList.get(i).value;				
-			}
-		}
-
-		return d/s;
-	}
-	
-	synchronized public List<TimePoint> getTimesLastSecond(long now){
-				
-		List<TimePoint> tl = new ArrayList<TimePoint>();
-		
-		for (TimePoint t : timeList) {
-			if (now - t.time < TIME){
-				tl.add(t);
-			}
-		}
-		return tl;
+		// dosn't matter, the important part is generating elswere
+		return timeList.get(timeList.size() - 1).value;
 	}
 
 	@Override
@@ -83,7 +61,8 @@ public class MyBeaconCustom2 extends MyBeaconRaw{
 		if (timeList == null) {
 			return;
 		}
-		
+
 		this.timeList.add(new TimePoint(newAccuracy, timeNow));
 	}
+
 }

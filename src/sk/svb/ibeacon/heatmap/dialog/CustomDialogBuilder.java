@@ -15,6 +15,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 /**
+ * dialog builder helper
  * 
  * @author svab
  *

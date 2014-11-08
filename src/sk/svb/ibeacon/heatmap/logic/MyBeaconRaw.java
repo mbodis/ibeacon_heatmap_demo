@@ -1,19 +1,21 @@
 package sk.svb.ibeacon.heatmap.logic;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.util.Log;
-
 /**
- * saves only one accuracy value
+ * main class of iBeacon
+ * 
  * @author mbodis
  *
  */
-public class MyBeaconRaw {
+public class MyBeaconRaw implements Serializable {
+	
+	private static final long serialVersionUID = 1609061642245270198L;
 
-	public static final int EMPTY = -1;
-	public static final String TAG = "MyBeaconClassRaw";
+	transient public static final int EMPTY = -1;
+	transient public static final String TAG = "MyBeaconClassRaw";
 
 	private int color = -1;
 	private int number;

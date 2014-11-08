@@ -2,17 +2,17 @@
 <resources>
 
     <!-- GENERAL -->
-    <string name="app_name">iBeacon Heatmap</string>
-    <string name="version">v0.9</string>
-    <string name="date">03.11.2014</string>
+    <string name="app_name">iBeacon Heatmap demo</string>
+    <string name="version">v0.95</string>
+    <string name="date">08.11.2014</string>
     <string name="name">Miroslav Bodis</string>
     <string name="url_github">https://github.com/</string><!-- TODO -->
 
     <!-- HELP -->
-    <string name="help1">This app demonstrate accuracy of iBeacons inside of a room and tries to generate heat map using them. Because of iBeacon\'s proximity error, we have to use some approximation method to increase the precision of our position.\n\n In this demo you can set size of a room and one of few approximation methods.\n\nTested on iBKS105 from accent-systems\n transmit interval: 0.1sec\nTX power +4dBm\n\naccuration method originally from \nhttps://github.com/alt236/Bluetooth-LE-Library---Android</string>
-    <string name="help2">You will need 3 iBeacons for this demo.\n First step is to assign colors to your iBeacons. You don\'t have to set UUID, major or minor values. Bluetooth address is used as unique identifier of iBeacons.</string>
+    <string name="help1">This app demonstrate accuracy of iBeacons inside of a room and tries to generate heat map using them. Because of iBeacon\'s proximity error, we have to use some approximation method to increase the precision of our position.\n\n In this demo you can set size of a room and choose one of few approximation methods.\n\nTested on iBKS105 from accent-systems\n transmit interval: 0.1sec\nTX power +4dBm\n\naccuration method originally from \nhttps://github.com/alt236/Bluetooth-LE-Library---Android</string>
+    <string name="help2">You will need at least 3 iBeacons for this demo(4 maximum).\n First step is to assign colors to your iBeacons. You don\'t have to set UUID, major or minor values. Bluetooth address is used as unique identifier of iBeacons.</string>
     <string name="help3">Set size of a room and select one of the approximation methods to get more precise values.</string>
-    <string name="help4">Place your iBeacon in the middle of the walls as picture above If you place the iBeacons wrong, you can get misleading results.\nDrag and drop to change location of iBeacons.</string>
+    <string name="help4">Place your iBeacon in the middle of the walls as picture above If you place the iBeacons wrong, you can get misleading results.\nDrag and drop to change location of iBeacons on canvas.</string>
     <string name="help5">Launch \'generate heat map\' and watch your position in time. You should see a heatmap of your moves.</string>
     <string name="help1_title">Welcome</string>
     <string name="help2_title">Assign color</string>
@@ -29,20 +29,20 @@
     <string name="generate_heatmap">Generate heatmap</string>
     <string name="app_method_title">approximation method</string>
     <string name="room_size">room size (in meters)</string>
-    <string name="err_need_3_ibeacon_for_heatmap">To generate iBeacons please cofigure 3 different iBeacons</string>
+    <string name="err_need_3_ibeacon_for_heatmap">To generate iBeacons please cofigure at least 3 different iBeacons</string>
     <string name="err_no_btle_support">Sorry, your device does not support Bluetooth LE</string>
+    <string name="toast_4_ibeacons_required">For this demo you\'ll need to set 4 iBeacons</string>
     <!-- LICENCE DIALOG -->
     <string name="licence_title">Licences</string>
     <!-- ABOUT DIALOG -->
     <string name="about_title">About</string>
-    <string name="about_message">version 1.0\n28.10.2014\n\nMiroslav Bodis </string>
 
     <string-array name="accuracy_type">
         <item>raw distance</item>
         <item>use average</item>        
         <item>2 second interval</item>
         <item>custom</item>
-        <item>custom2</item>
+        <item>save all</item>
     </string-array>
     
     <string-array name="accuracy_type_help">
@@ -50,7 +50,7 @@
         <item>Averaged over last 30 values.</item>        
         <item>Averaged over last two minimum values of the last 2 seconds.</item>
         <item>Averaged over last two minimum values of the last 15 values. Maximum change from the previous position is limited to 0.1 meter.</item>
-        <item>Heat map generation contains of comparison of all values from 1 second interval for each iBeacon. Visualization shows average of last second.</item>
+        <item>This demo has different approach. It stores all iBeacons accuracies from 10 seconds. Then it compares every accuracies from iBeacon in 1 second interval and draw it on display. This heat map generation can take few minues, so be patient.</item>
     </string-array>
 
     <!-- IBEACON SETUP -->
@@ -82,5 +82,7 @@
     <string name="toast_remove_logs">Removing previous logs…</string>
     <string name="on">on</string>
     <string name="off">off</string>
+    <string name="heatmap_generation_start">heatmap generation starting</string>
+    <string name="genrating_heatmap_title">Generating heatmap, this can take a while</string>
 
 </resources>

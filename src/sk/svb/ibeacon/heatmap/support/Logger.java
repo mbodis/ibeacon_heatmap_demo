@@ -10,6 +10,11 @@ import java.util.Locale;
 
 import android.content.Context;
 
+/**
+ * logging common class
+ * @author mbodis
+ *
+ */
 public class Logger {
 
 	public static final String FILE_IBEACON = "log_ibeacon.txt";
@@ -22,7 +27,7 @@ public class Logger {
 			FILE_IBEACON };
 
 	/**
-	 * loging into files
+	 * logging into files
 	 */
 	public static void addLog(Context context, String logFileName,
 			String content) {

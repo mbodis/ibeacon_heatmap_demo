@@ -16,7 +16,7 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 
 /**
- * // TODO DO A DATABASE INSTEAD OF THIS
+ * // TODO DO A DATABASE INSTEAD OF THIS preferences monster
  * 
  * @author mbodis
  *

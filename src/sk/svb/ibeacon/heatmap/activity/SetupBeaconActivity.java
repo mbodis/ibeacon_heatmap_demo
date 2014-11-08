@@ -38,7 +38,7 @@ import android.widget.TextView;
 /**
  * 
  * assigning beacons a color<br>
- * in this demo we will use a bt-address as unque identifier
+ * in this demo we will use a blue-tooth address as unique identifier
  * 
  * @author mbodis
  *
@@ -55,7 +55,7 @@ public class SetupBeaconActivity extends Activity {
 	private ArrayList<MyIBeaconDevice> iBeaconList;
 	private ArrayAdapter<MyBeaconRaw> adapter;
 
-	// period for searching iBeacons 5 sec
+	// period for searching iBeacons 5 seconds
 	private static final long SCAN_PERIOD = 5000;
 	// number scanning of seconds
 	private int scanTimer = (int) (SCAN_PERIOD / 1000);

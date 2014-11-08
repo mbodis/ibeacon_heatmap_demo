@@ -1,15 +1,14 @@
 package sk.svb.ibeacon.heatmap.logic;
 
-import android.util.Log;
-
 /**
- * keep 30 last values
- * return average from last 30 values 
+ * keep 30 last values return average from last 30 values
+ * 
  * @author mbodis
  *
  */
 public class MyBeaconAverage extends MyBeaconRaw {
 
+	private static final long serialVersionUID = 3148207854267295100L;
 	public static final int DISTANCE_LIST_SIZE = 30;
 	public static final String TAG = "MyBeaconClassAverage";
 
@@ -32,7 +31,7 @@ public class MyBeaconAverage extends MyBeaconRaw {
 		if (accList == null || accList.size() == 0) {
 			return EMPTY;
 		}
-		
+
 		while (this.accList.size() > DISTANCE_LIST_SIZE) {
 			this.accList.remove(0);
 		}
@@ -43,7 +42,7 @@ public class MyBeaconAverage extends MyBeaconRaw {
 		}
 
 		double res = d / accList.size();
-		 return res;		
+		return res;
 	}
 
 	@Override
@@ -52,7 +51,7 @@ public class MyBeaconAverage extends MyBeaconRaw {
 
 		if (this.accList == null)
 			return;
-		
+
 		this.accList.add(accuracy);
 	}
 

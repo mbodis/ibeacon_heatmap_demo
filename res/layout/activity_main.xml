@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/my_text_margin"
-            android:drawableLeft="@android:drawable/ic_menu_preferences"
+            android:drawableStart="@android:drawable/ic_menu_preferences"
             android:drawablePadding="10dp"
             android:onClick="setupIBeacons"
             android:text="@string/setup_beacons" />
@@ -25,7 +25,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@android:drawable/ic_media_play"
+            android:drawableStart="@android:drawable/ic_media_play"
             android:onClick="showBeacons"
             android:text="@string/generate_heatmap" />
 

@@ -1,24 +1,28 @@
 package sk.svb.ibeacon.heatmap.support;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 
 /**
- * some static methods
+ * some helpful methods
+ * 
  * @author mbodis
  *
  */
 public class MySupport {
 
 	/**
-	 * get contetent form file in resourecs-raw
+	 * get content form file in resources-raw
 	 */
 	public static String loadFile(Resources res, int id) {
 		String result = "";
@@ -68,6 +72,42 @@ public class MySupport {
 		Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height,
 				matrix, false);
 		return resizedBitmap;
+	}
+
+	/**
+	 * http://stackoverflow.com/questions/649154/save-bitmap-to-location
+	 * 
+	 * @param bitmap
+	 * @param filename
+	 */
+	public static String saveBitmapToFile(Context ctx, Bitmap bitmap,
+			String filename) {
+
+		(new File(ctx.getExternalFilesDir(null) + "/log", "")).mkdirs();
+		File file = new File(ctx.getExternalFilesDir(null) + "/log", filename);
+
+		FileOutputStream out = null;
+		try {
+			out = new FileOutputStream(file.getAbsoluteFile());
+			bitmap.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your
+																	// Bitmap
+																	// instance
+			// PNG is a lossless format, the compression factor (100) is ignored
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			try {
+				if (out != null) {
+					out.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+		return file.getAbsolutePath();
+
 	}
 
 }

@@ -8,13 +8,12 @@ import java.util.Locale;
 
 import sk.svb.ibeacon.heatmap.R;
 import sk.svb.ibeacon.heatmap.db.DatabaseHelper;
-import sk.svb.ibeacon.heatmap.logic.HeatPoint;
+import sk.svb.ibeacon.heatmap.logic.CanvasHelp;
 import sk.svb.ibeacon.heatmap.logic.IBeaconHeatMap;
-import sk.svb.ibeacon.heatmap.logic.MyBeaconCustom2;
 import sk.svb.ibeacon.heatmap.logic.MyBeaconRaw;
 import sk.svb.ibeacon.heatmap.logic.MyIBeaconDevice;
 import sk.svb.ibeacon.heatmap.logic.MyPointF;
-import sk.svb.ibeacon.heatmap.logic.TimePoint;
+import sk.svb.ibeacon.heatmap.service.HeatMapService;
 import sk.svb.ibeacon.heatmap.support.Logger;
 import sk.svb.ibeacon.heatmap.support.MySupport;
 import uk.co.alt236.bluetoothlelib.device.BluetoothLeDevice;
@@ -26,7 +25,10 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAdapter.LeScanCallback;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -50,9 +52,9 @@ import android.widget.Toast;
 
 /**
  * the position of iBeacons is fixed: place your beacon as you see on screen (by
- * colors) draw beacon accuraties<br>
- * draw heatmap, based on your locatin to iBeacons<br>
- * if accuraties are close enought, a heat point is created - or heated up<br>
+ * colors) draw beacon accuracies<br>
+ * draw heat0map, based on your location to iBeacons<br>
+ * if accuracies are close enough, a heat point is created - or heated up<br>
  * 
  * @author mbodis
  *
@@ -63,8 +65,8 @@ public class ShowBeaconsActivity extends Activity {
 
 	private static final String TAG = "ShowBeaconsActivity";
 
-	private static final int ALPHA = 20;
-	private static final int NO_ALPHA = 255;
+	public static final int ALPHA = 20;
+	public static final int NO_ALPHA = 255;
 
 	// layout, common
 	private MySurfaceView mySurfaceView;
@@ -76,7 +78,7 @@ public class ShowBeaconsActivity extends Activity {
 	private boolean logIntoFile = false;
 	private PowerManager.WakeLock wl;
 
-	// ibeacon scan
+	// iBeacon scan
 	List<?> myBeacons;
 	private BluetoothAdapter mBluetoothAdapter;
 	private LeScanCallback mLeScanCallback;
@@ -87,7 +89,7 @@ public class ShowBeaconsActivity extends Activity {
 	private float meter; // meter in pixels
 	private int roomW, roomH;
 
-	// canvas ibeacons
+	// canvas iBeacons
 	private float radiusR = 0f;
 	private float radiusG = 0f;
 	private float radiusB = 0f;
@@ -102,8 +104,15 @@ public class ShowBeaconsActivity extends Activity {
 	private boolean useHeatMap = false;
 	private IBeaconHeatMap hmb;
 	private Bitmap gradient;
-	private long methodCustomLastUpdate = 0;
+	private long startTime = System.currentTimeMillis();
 	private String movingIBeacon; // moving iBeacons on canvas
+	private boolean updateNewValues = true;
+
+	// custom generation heatMap
+	private boolean customGenerationHeatMapStarted = false;
+	private Bitmap generatedHeatMapFromService;
+	private boolean generatingHeatmap = false;
+	private BroadcastReceiver receiver;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -223,6 +232,7 @@ public class ShowBeaconsActivity extends Activity {
 		gradient = MySupport.getResizedBitmap(gradient, (int) (20 * dn),
 				(int) (180 * dn));
 
+		initReceiver();
 	}
 
 	@Override
@@ -241,6 +251,46 @@ public class ShowBeaconsActivity extends Activity {
 		super.onResume();
 		mySurfaceView.onResume();
 
+	}
+
+	@Override
+	protected void onDestroy() {
+		this.unregisterReceiver(receiver);
+		super.onDestroy();
+	}
+
+	private void initReceiver() {
+		IntentFilter filter = new IntentFilter(HeatMapService.PROCESS_RESPONSE);
+		filter.addCategory(Intent.CATEGORY_DEFAULT);
+		receiver = new BroadcastReceiver() {
+
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				Log.d(TAG, "onReceive - message from intentService");
+				
+				if (intent != null) {
+					String path = intent.getStringExtra("filePath");
+					if (path == null) {
+						Log.d(TAG, "empty content");
+						return;
+
+					} else {
+						generatingHeatmap = false;
+
+						BitmapFactory.Options options = new BitmapFactory.Options();
+						options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+						generatedHeatMapFromService = BitmapFactory.decodeFile(
+								path, options);						
+						setContentView(mySurfaceView);
+						Log.d(TAG, "intent updated bitmap");
+					}
+
+				}
+
+			}
+
+		};
+		registerReceiver(receiver, filter);
 	}
 
 	@Override
@@ -318,29 +368,32 @@ public class ShowBeaconsActivity extends Activity {
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
+						if (updateNewValues) {
 
-						final BluetoothLeDevice deviceLe = new BluetoothLeDevice(
-								device, rssi, scanRecord,
-								System.currentTimeMillis());
+							final BluetoothLeDevice deviceLe = new BluetoothLeDevice(
+									device, rssi, scanRecord,
+									System.currentTimeMillis());
 
-						if (IBeaconUtils.isThisAnIBeacon(deviceLe)) {
-							MyIBeaconDevice ibeacon = new MyIBeaconDevice(
-									deviceLe);
+							if (IBeaconUtils.isThisAnIBeacon(deviceLe)) {
+								MyIBeaconDevice ibeacon = new MyIBeaconDevice(
+										deviceLe);
 
-							for (int i = 0; i < myBeacons.size(); i++) {
+								for (int i = 0; i < myBeacons.size(); i++) {
 
-								// match beacon
-								if (((MyBeaconRaw) myBeacons.get(i))
-										.getDeviceAddress().equals(
-												ibeacon.getAddress())) {
+									// match beacon
+									if (((MyBeaconRaw) myBeacons.get(i))
+											.getDeviceAddress().equals(
+													ibeacon.getAddress())) {
 
-									// update accuracy
-									((MyBeaconRaw) myBeacons.get(i))
-											.setAccuracy(ibeacon.getAccuracy(),
-													System.currentTimeMillis());
+										// update accuracy
+										((MyBeaconRaw) myBeacons.get(i))
+												.setAccuracy(ibeacon
+														.getAccuracy(), System
+														.currentTimeMillis());
+									}
 								}
-							}
 
+							}
 						}
 
 					}
@@ -422,9 +475,11 @@ public class ShowBeaconsActivity extends Activity {
 					continue;
 				}
 
-				Canvas c = holder.lockCanvas();
-				myDraw(c);
-				holder.unlockCanvasAndPost(c);
+				if (!generatingHeatmap) {
+					Canvas c = holder.lockCanvas();
+					myDraw(c);
+					holder.unlockCanvasAndPost(c);
+				}
 
 			}
 		}
@@ -448,19 +503,26 @@ public class ShowBeaconsActivity extends Activity {
 		}
 
 		/**
-		 * draw beacon accuraties<br>
-		 * draw heatmap, based on your locatin to iBeacons<br>
-		 * if accuraties are close enought, add a heat point
+		 * draw beacon accuracies<br>
+		 * draw heat-map, based on your location to iBeacons<br>
+		 * if accuracies are close enough, add a heat point
 		 */
 		protected void myDraw(Canvas canvas) {
 
+			if (generatingHeatmap) {
+				return;
+			} else if (generatedHeatMapFromService != null) {
+				canvas.drawBitmap(generatedHeatMapFromService, 0, 0, null);
+				return;
+			}
+
 			if (!initCanvasSizes) {
 				initCanvas(canvas);
+			} else {
+				canvas.drawBitmap(hmb.getBitmap(), 0, 0, null);
 			}
 
 			updateRadius();
-
-			canvas.drawARGB(255, 255, 255, 255);
 
 			canvas.drawRect(margin, margin, margin + roomW * meter, margin
 					+ roomH * meter, psqBL);
@@ -469,7 +531,7 @@ public class ShowBeaconsActivity extends Activity {
 			canvas.drawCircle(bx, by, 4, pB);
 			canvas.drawCircle(yx, yy, 4, pY);
 
-			// show accuraties from iBeacons
+			// show accuracies from iBeacons
 			if (toggleIBeacons) {
 				canvas.drawCircle(rx, ry, radiusR * meter, pRa);
 				canvas.drawCircle(gx, gy, radiusG * meter, pGa);
@@ -479,72 +541,65 @@ public class ShowBeaconsActivity extends Activity {
 
 			// if you have set 3 beacons we can use heatMap
 			if (useHeatMap && toggleHeatMap) {
-				if (method == MainActivity.METHOD_CUSTOM2) {
 
-					if (System.currentTimeMillis() - methodCustomLastUpdate > 1000) {
-
-						methodCustomLastUpdate = System.currentTimeMillis();
-						for (TimePoint tpR : ((MyBeaconCustom2) myBeacons
-								.get(0))
-								.getTimesLastSecond(methodCustomLastUpdate)) {
-
-							for (TimePoint tpG : ((MyBeaconCustom2) myBeacons
-									.get(1))
-									.getTimesLastSecond(methodCustomLastUpdate)) {
-
-								for (TimePoint tpB : ((MyBeaconCustom2) myBeacons
-										.get(2))
-										.getTimesLastSecond(methodCustomLastUpdate)) {
-
-								
-									for (TimePoint tpY : ((MyBeaconCustom2) myBeacons
-											.get(3))
-											.getTimesLastSecond(methodCustomLastUpdate)) {
-	
-										hmb.addBeaconAccuracy(System
-												.currentTimeMillis(), canvas,
-												meter, new MyPointF(rx, ry,
-														tpR.value * meter),
-												new MyPointF(gx, gy, tpG.value
-														* meter), new MyPointF(bx,
-														by, tpB.value * meter),
-												new MyPointF(yx, yy, tpY.value
-														* meter));
-									}
-								}
-							}
-
-						}
-					}
-
-				} else {
-					hmb.addBeaconAccuracy(System.currentTimeMillis(), canvas,
-							meter, new MyPointF(rx, ry, radiusR * meter),
+				// METHOD_CUSTOM2 is too expensive
+				if (method != MainActivity.METHOD_CUSTOM2) {
+					hmb.addBeaconAccuracyFilter(System.currentTimeMillis(),
+							canvas.getWidth(), canvas.getHeight(), meter,
+							new MyPointF(rx, ry, radiusR * meter),
 							new MyPointF(gx, gy, radiusG * meter),
 							new MyPointF(bx, by, radiusB * meter),
-							new MyPointF(yx, yy, radiusY * meter));
+							new MyPointF(yx, yy, radiusY * meter),
+							hmb.getHeatPointList());
 				}
 
 				// drawing heat map
-				for (HeatPoint hp : hmb.getHeatPointList()) {
-					Paint p = new Paint();
-					p.setARGB(
-							NO_ALPHA,
-							255 / HeatPoint.MAX_HEAT * hp.getHeatLevel(),
-							0,
-							255 / HeatPoint.MAX_HEAT * HeatPoint.MAX_HEAT
-									- hp.getHeatLevel());
-					canvas.drawPoint(hp.x, hp.y, p);
-				}
+				hmb.doHeatmapRedraw();
+
 			}
 
-			// draw logs, heatmap at bottom, circle penetration
+			// draw logs, heat-map at bottom, circle penetration
 			if (toggleLog) {
 				drawLogs(canvas);
 				drawCircleIntersection(canvas);
 			}
 
+			// custom generation
+			if (!customGenerationHeatMapStarted
+					&& method == MainActivity.METHOD_CUSTOM2
+					&& (System.currentTimeMillis() - startTime) / 1000 == MainActivity.METHOD_CUSTOM2_TIME_AGGREGATION) {
+				customGenerationHeatMapStarted = true;
+				updateNewValues = false;
+				unsetRadiuses();
+				mBluetoothAdapter.stopLeScan(mLeScanCallback);
+
+				CanvasHelp ch = new CanvasHelp(rx, ry, gx, gy, bx, by, yx, yy,
+						meter);
+				hmb.custom2GenerateHeatmap(getApplicationContext(), myBeacons,
+						MainActivity.METHOD_CUSTOM2, startTime,
+						canvas.getWidth(), canvas.getHeight(), ch);
+				generatingHeatmap = true;
+
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+
+						setContentView(R.layout.generating_heatmap_view);
+
+					}
+				});
+
+			}
+
 		}
+
+	}
+
+	private void unsetRadiuses() {
+		radiusR = 0f;
+		radiusG = 0f;
+		radiusB = 0f;
+		radiusY = 0f;
 	}
 
 	private void vibrate() {
@@ -616,10 +671,11 @@ public class ShowBeaconsActivity extends Activity {
 	private void initCanvas(Canvas canvas) {
 		initCanvasSizes = true;
 
+		hmb.setCanvas(canvas);
 		margin = canvas.getHeight() / 20;
 
 		// use canvas.width as main parameter
-		if ((canvas.getHeight() - 2 * margin) / roomH * roomW  + 2*margin> canvas
+		if ((canvas.getHeight() - 2 * margin) / roomH * roomW + 2 * margin > canvas
 				.getWidth()) {
 			meter = (canvas.getWidth() - 2 * margin) / roomW;
 
@@ -647,9 +703,18 @@ public class ShowBeaconsActivity extends Activity {
 	 * draw logs:<br>
 	 * - radius in meters of red, green, blue iBeacon<br>
 	 * - pixel representation 1 meter<br>
-	 * - heatmap scale<br>
+	 * - heat-map scale<br>
 	 */
 	private void drawLogs(Canvas canvas) {
+		if (!customGenerationHeatMapStarted
+				&& method == MainActivity.METHOD_CUSTOM2) {
+			canvas.drawText(
+					getString(R.string.heatmap_generation_start)
+							+ ": "
+							+ (MainActivity.METHOD_CUSTOM2_TIME_AGGREGATION - ((System
+									.currentTimeMillis() - startTime) / 1000)),
+					10 * dn, 10 * dn, pBL);
+		}
 		canvas.drawText("red: " + radiusR + " m", 10 * dn, 20 * dn, pR);
 		canvas.drawText("green: " + radiusG + " m", 10 * dn, 30 * dn, pG);
 		canvas.drawText("blue: " + radiusB + " m", 10 * dn, 40 * dn, pB);
