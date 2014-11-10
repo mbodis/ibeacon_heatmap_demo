@@ -65,7 +65,13 @@ public class IBeaconHeatMap {
 	}
 
 	public void resetHeatMap() {
+		mCanvas.drawARGB(255, 255, 255, 255);
 		heatPointList = new ArrayList<HeatPoint>();
+
+	}
+		
+	public void toggleHeatMap() {
+		mCanvas.drawARGB(255, 255, 255, 255);		
 
 	}
 

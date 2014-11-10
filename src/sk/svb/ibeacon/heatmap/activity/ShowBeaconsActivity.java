@@ -312,6 +312,7 @@ public class ShowBeaconsActivity extends Activity {
 					Toast.LENGTH_SHORT).show();
 			return true;
 		} else if (id == R.id.action_toggle_heatmap) {
+			hmb.toggleHeatMap();
 			toggleHeatMap = !toggleHeatMap;
 			Toast.makeText(
 					getApplicationContext(),
@@ -540,7 +541,7 @@ public class ShowBeaconsActivity extends Activity {
 			}
 
 			// if you have set 3 beacons we can use heatMap
-			if (useHeatMap && toggleHeatMap) {
+			if (useHeatMap) {
 
 				// METHOD_CUSTOM2 is too expensive
 				if (method != MainActivity.METHOD_CUSTOM2) {
@@ -552,11 +553,13 @@ public class ShowBeaconsActivity extends Activity {
 							new MyPointF(yx, yy, radiusY * meter),
 							hmb.getHeatPointList());
 				}
-
+				
 				// drawing heat map
-				hmb.doHeatmapRedraw();
-
-			}
+				if (toggleHeatMap){
+					hmb.doHeatmapRedraw();					
+				}
+				
+			}						
 
 			// draw logs, heat-map at bottom, circle penetration
 			if (toggleLog) {
