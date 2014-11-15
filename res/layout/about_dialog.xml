@@ -39,12 +39,15 @@
         android:textColor="@color/black" />
 
     <TextView
+        android:id="@+id/githublink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="@dimen/my_text_margin"
         android:layout_marginTop="@dimen/my_text_margin"
         android:autoLink="web"
+        android:gravity="center_horizontal"
+        android:linksClickable="false"
         android:text="@string/url_github"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 

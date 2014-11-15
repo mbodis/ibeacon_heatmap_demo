@@ -9,12 +9,14 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -156,6 +158,17 @@ public class MainActivity extends Activity {
 				.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 		final View layout = inflater.inflate(R.layout.about_dialog, null);
 		cdb.setView(layout);
+		((TextView) layout.findViewById(R.id.githublink))
+				.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+								Uri.parse(getString(R.string.url_github)));
+						startActivity(browserIntent);
+
+					}
+				});
 		cdb.setNeutralButton(android.R.string.ok, null);
 		ad = cdb.create();
 		ad.show();
@@ -189,7 +202,8 @@ public class MainActivity extends Activity {
 			intent.putExtra("r_height", getRoomHeight());
 		}
 		if (numbSettIbeacons != 4 && getSelectedMethod() == METHOD_CUSTOM2) {
-			Toast.makeText(this, getString(R.string.toast_4_ibeacons_required), Toast.LENGTH_LONG).show();
+			Toast.makeText(this, getString(R.string.toast_4_ibeacons_required),
+					Toast.LENGTH_LONG).show();
 		} else {
 			startActivity(intent);
 		}

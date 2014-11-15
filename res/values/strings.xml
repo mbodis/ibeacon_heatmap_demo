@@ -6,7 +6,7 @@
     <string name="version">v0.95</string>
     <string name="date">08.11.2014</string>
     <string name="name">Miroslav Bodis</string>
-    <string name="url_github">https://github.com/</string><!-- TODO -->
+    <string name="url_github">https://github.com/svab-m/ibeacon_heatmap_demo</string>
 
     <!-- HELP -->
     <string name="help1">This app demonstrate accuracy of iBeacons inside of a room and tries to generate heat map using them. Because of iBeacon\'s proximity error, we have to use some approximation method to increase the precision of our position.\n\n In this demo you can set size of a room and choose one of few approximation methods.\n\nTested on iBKS105 from accent-systems\n transmit interval: 0.1sec\nTX power +4dBm\n\naccuration method originally from \nhttps://github.com/alt236/Bluetooth-LE-Library---Android</string>
